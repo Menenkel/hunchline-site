@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hunchline</title>
+<meta name="description" content="One number from today's news. Guess it on a slider and see how close you got against everyone else.">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<style>
+  :root { --bg: #000; --fg: #fff; --fg2: #e6e6e6; --muted: #7a7a7a; --line: #2a2a2a; --accent: #f2c31b; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); }
+  body {
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: max(28px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+  }
+  main { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 20px; }
+  .wordmark { font-weight: 800; font-size: 44px; letter-spacing: -0.03em; position: relative; display: inline-block; padding-top: 10px; }
+  .wordmark::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--fg); }
+  .wordmark::after { content: ""; position: absolute; top: -4px; left: 62%; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); }
+  p { margin: 0; color: var(--fg2); }
+  .soon {
+    border: 1.5px solid var(--line); border-radius: 12px; padding: 15px 18px; text-align: center;
+    font-weight: 700; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  }
+  footer { font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <div><span class="wordmark">hunchline</span></div>
+  <p>One number from today's news. Guess it on a slider, see where you land against everyone else, and beat a friend to fill the jar.</p>
+  <div class="soon">Coming soon to the App Store</div>
+  <footer>© Hunchline</footer>
+</main>
+</body>
+</html>
