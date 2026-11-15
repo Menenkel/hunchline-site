@@ -35,6 +35,9 @@
   .wrap { position:relative; z-index:1; max-width:1120px; margin:0 auto; }
   a { color:inherit; }
 
+  /* first screen = exactly one viewport: header, headline, question, slider, Lock in. The next section starts below the fold. */
+  .first { display:flex; flex-direction:column; min-height:calc(100vh - max(12px, env(safe-area-inset-top)) - max(20px, env(safe-area-inset-bottom))); min-height:calc(100svh - max(12px, env(safe-area-inset-top)) - max(20px, env(safe-area-inset-bottom))); }
+  .first .hero { margin-top:auto; } .first .stage { margin-bottom:auto; }
   header { display:flex; align-items:center; justify-content:space-between; }
   .mark { font-weight:800; font-size:27px; letter-spacing:-.04em; position:relative; padding-top:9px; text-decoration:none; }
   .mark::before { content:""; position:absolute; left:0; right:0; top:0; height:3px; border-radius:3px; background:var(--fg); }
@@ -165,9 +168,16 @@
   @media (max-width:420px) { .hint { display:block; width:100%; } .row { gap:12px; } }
   /* the whole first screen (headline, question, slider, Lock in) fits without scrolling */
   @media (min-width:640px) { h1 { white-space:nowrap; } }
-  @media (max-width:639px) { h1 { font-size:clamp(44px, min(15vw, 8.6vh), 96px); } .deck { max-width:34ch; } }
-  @media (max-height:760px) { .kicker { display:none; } }
-  @media (max-height:640px) { .deck, .hint { display:none; } }
+  @media (max-width:639px) {
+    h1 { font-size:clamp(44px, min(15vw, 8.6vh), 96px); }
+    .deck { max-width:34ch; font-size:clamp(16px, 4.8vw, 22px); }
+    .q { font-size:clamp(18px, 5.4vw, 26px); }
+    .val output { font-size:clamp(46px, min(17vw, 10vh), 100px); }
+  }
+  @media (max-height:560px) { .kicker { display:none; } }
+  @media (max-height:520px) { .deck, .hint { display:none; } }
+  @media (max-width:639px) and (max-height:700px) { .kicker { display:none; } }
+  @media (max-width:639px) and (max-height:680px) { .deck, .hint { display:none; } }
   @media (max-height:500px) {
     .lane { height:68px; } .line { top:32px; } .knob, .ans { top:34px; }
     .btn { height:46px; } .tog button { min-height:36px; }
@@ -179,6 +189,7 @@
 </head>
 <body>
 <div class="wrap">
+ <div class="first">
   <header>
     <a class="mark" href="/">hunchline</a>
     <span class="tag">Free · iPhone</span>
@@ -237,6 +248,7 @@
       </div>
     </div></div>
   </section>
+ </div>
 
   <section class="jar" id="jar">
     <div class="jar-copy">
