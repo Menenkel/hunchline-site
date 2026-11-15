@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hunchline — guess what's news</title>
-<meta name="description" content="Guess one number from today's news, see how sharp your hunch was, and keep a virtual jar with a friend. The drinks are real, the money isn't.">
+<meta name="description" content="Guess one number from today's news, see how sharp your hunch was, and keep a virtual jar with a friend. The time together is real, the money isn't.">
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
 <meta name="robots" content="noindex,nofollow">
@@ -178,7 +178,7 @@
   <section class="hero">
     <div class="kicker"><i></i>A daily game for two</div>
     <h1>Guess what's <em>News?</em></h1>
-    <p class="deck">One number from today's news. Whoever's further off buys the drinks. <b>In person.</b></p>
+    <p class="deck">One number from today's news. Whoever's further off treats the other: drinks, a movie, anything. <b>In person.</b></p>
   </section>
 
   <section class="stage pulse" id="stage" aria-label="Try it">
@@ -232,12 +232,12 @@
   <section class="jar" id="jar">
     <div class="jar-copy">
       <div class="kicker"><i></i>The jar</div>
-      <h2>The jar is pretend.<br><em>The drinks are real.</em></h2>
+      <h2>The jar is pretend.<br><em>The time together is real.</em></h2>
       <p class="lead">Play against one friend. Each time you're further off than they are, $0.10 drops on your side of the jar. It's a running tally between the two of you and nothing more. No payments, no cards, no cash in the app. The game is the excuse. The evening is the point.</p>
       <dl class="ledger">
         <div><dt>Each miss</dt><dd>$0.10 on your side</dd></div>
-        <div><dt>Month ends</dt><dd>Loser buys</dd></div>
-        <div><dt>The bill</dt><dd>Drinks or movie tickets</dd></div>
+        <div><dt>Month ends</dt><dd>Loser treats</dd></div>
+        <div><dt>The treat</dt><dd>Drinks, movies, anything</dd></div>
         <div class="zero"><dt>Money moved in the app</dt><dd>$0.00</dd></div>
       </dl>
     </div>
@@ -428,7 +428,7 @@
     $('ty').textContent = money(jy.cents); $('tf').textContent = money(jf.cents);
     if (bumpEl) { bumpEl.classList.add('bump'); setTimeout(() => bumpEl.classList.remove('bump'), 380); }
     const d = jy.cents - jf.cents, amt = money(Math.abs(d));
-    $('net').textContent = d === 0 ? 'All square. Make your guess.' : d > 0 ? `You're ${amt} behind. You're buying.` : `Friend's ${amt} behind. They're buying.`;
+    $('net').textContent = d === 0 ? 'All square. Make your guess.' : d > 0 ? `You're ${amt} behind. You're treating.` : `Friend's ${amt} behind. They're treating.`;
   }
   tally();
   let running = false;
