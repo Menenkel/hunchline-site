@@ -26,7 +26,7 @@
   body {
     font:500 16px/1.5 var(--display); font-variation-settings:"wdth" 100;
     -webkit-font-smoothing:antialiased; overflow-x:hidden;
-    padding:max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+    padding:max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   }
   body::before {
     content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
@@ -52,9 +52,9 @@
   h1 em { font-style:normal; color:var(--accent); }
 
   .stage { padding-top:38px; }
-  .qrow { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+  .qhead { display:flex; justify-content:space-between; align-items:center; gap:12px; }
   .qlabel { font:500 11px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
-  .q { margin:6px 0 0; font-weight:650; font-size:clamp(20px,2.7vw,28px); line-height:1.15; letter-spacing:-.02em; max-width:30ch; text-wrap:balance; }
+  .q { margin:10px 0 0; font-weight:650; font-size:clamp(21px,2.7vw,28px); line-height:1.18; letter-spacing:-.02em; max-width:32ch; text-wrap:balance; }
   .tog { display:flex; border:1.5px solid var(--line2); border-radius:999px; padding:2px; flex:none; }
   .tog.off { visibility:hidden; }
   .tog button { font:500 10px var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); background:transparent; border:0; padding:6px 11px; border-radius:999px; cursor:pointer; }
@@ -66,7 +66,7 @@
 
   /* full-bleed line */
   .bleed { width:100vw; margin-left:calc(50% - 50vw); }
-  .lane { position:relative; height:84px; touch-action:none; cursor:grab; user-select:none; -webkit-user-select:none; }
+  .lane { position:relative; height:88px; touch-action:pan-y; -webkit-tap-highlight-color:transparent; cursor:grab; user-select:none; -webkit-user-select:none; }
   .lane:active { cursor:grabbing; }
   .lane:focus-visible { outline:2px solid var(--accent); outline-offset:-6px; }
   .line { position:absolute; left:0; right:0; top:40px; height:4px; background:var(--fg); }
@@ -143,13 +143,28 @@
   .btn svg { width:20px; height:20px; fill:currentColor; margin-top:-2px; }
   footer { display:flex; justify-content:space-between; font:400 11px var(--mono); color:var(--muted); padding:26px 0 6px; }
 
-  @media (max-width:820px) {
+  @media (max-width:900px) {
     :root { --inset:30px; }
-    .result, .jar { grid-template-columns:1fr; }
-    .jar { gap:36px; margin-top:64px; }
-    .dl { margin-top:64px; } .dl .btn { width:100%; padding:0 16px; letter-spacing:.06em; }
-    .stamp { top:24px; font-size:10px; padding:5px 8px; }
+    .hero { padding-top:28px; }
+    .stage { padding-top:30px; }
+    .result { grid-template-columns:1fr; }
+    .jar { display:flex; flex-direction:column; align-items:stretch; margin-top:56px; padding-top:34px; }
+    .result > div:last-child { max-width:380px; }
+    .jar-copy { display:contents; }
+    .jar-copy .kicker { order:1; } .jar-copy h2 { order:2; }
+    .jar-art { order:3; margin-top:26px; }
+    .jar p.lead { order:4; margin-top:30px; font-size:16px; }
+    .ledger { order:5; max-width:none; }
+    .dl { margin-top:56px; } .dl .btn { width:100%; padding:0 16px; letter-spacing:.06em; }
+    .stamp { top:24px; font-size:11px; padding:5px 8px; }
+    /* comfortable touch targets and readable small text */
+    .tog button { min-height:44px; padding:0 16px; font-size:12px; }
+    .tag, .qlabel, .kicker, .ticks, .ans b, .eg, footer, .hint, .cap { font-size:11.5px; }
+    .h2h, .ledger div { font-size:12.5px; }
+    .btn { height:56px; } .btn.big { height:62px; }
+    figcaption { font-size:12px; }
   }
+  @media (max-width:420px) { .hint { display:block; width:100%; } .row { gap:12px; } }
   @media (prefers-reduced-motion:reduce) { *{animation:none!important; transition:none!important;} }
 </style>
 </head>
@@ -161,19 +176,17 @@
   </header>
 
   <section class="hero">
-    <div class="kicker"><i></i>A daily game for you and a friend</div>
+    <div class="kicker"><i></i>A daily game for two</div>
     <h1>Guess what's <em>News?</em></h1>
     <p class="deck">One number from today's news. Whoever's further off buys the drinks. <b>In person.</b></p>
   </section>
 
   <section class="stage pulse" id="stage" aria-label="Try it">
-    <div class="qrow">
-      <div>
-        <div class="qlabel">From the news · try it</div>
-        <p class="q" id="qtext"></p>
-      </div>
+    <div class="qhead">
+      <div class="qlabel">From the news · try it</div>
       <div class="tog off" id="tog" role="group" aria-label="Units"><button data-s="imp" aria-pressed="false">US</button><button data-s="met" aria-pressed="true">Metric</button></div>
     </div>
+    <p class="q" id="qtext"></p>
 
     <div class="val"><output id="out"></output><span class="u" id="unit"></span><span class="u" id="conv"></span></div>
 
@@ -205,7 +218,7 @@
           <svg class="bell" viewBox="0 0 340 90" aria-hidden="true">
             <path id="curve" d="" fill="rgba(255,255,255,.08)" stroke="#fff" stroke-width="2"/>
             <line id="alin" y1="16" y2="78" stroke="#fff" stroke-width="2" stroke-dasharray="3 3"/>
-            <text id="alab" y="10" fill="#fff" font-size="8.5" font-weight="500" letter-spacing="1.2" text-anchor="middle" font-family="DM Mono, monospace">ANSWER</text>
+            <text id="alab" y="10" fill="#fff" font-size="10" font-weight="500" letter-spacing="1" text-anchor="middle" font-family="DM Mono, monospace">ANSWER</text>
             <line id="you" y1="6" y2="78" stroke="#f2c31b" stroke-width="3" stroke-linecap="round"/>
             <circle id="youd" r="6" fill="#f2c31b"/>
             <line x1="0" x2="340" y1="78" y2="78" stroke="#fff" stroke-width="2"/>
@@ -217,13 +230,13 @@
   </section>
 
   <section class="jar" id="jar">
-    <div>
+    <div class="jar-copy">
       <div class="kicker"><i></i>The jar</div>
       <h2>The jar is pretend.<br><em>The drinks are real.</em></h2>
       <p class="lead">Play against one friend. Each time you're further off than they are, $0.10 drops on your side of the jar. It's a running tally between the two of you and nothing more. No payments, no cards, no cash in the app. The game is the excuse. The evening is the point.</p>
       <dl class="ledger">
         <div><dt>Each miss</dt><dd>$0.10 on your side</dd></div>
-        <div><dt>Last day of the month</dt><dd>Whoever's behind buys</dd></div>
+        <div><dt>Month ends</dt><dd>Loser buys</dd></div>
         <div><dt>The bill</dt><dd>Drinks or movie tickets</dd></div>
         <div class="zero"><dt>Money moved in the app</dt><dd>$0.00</dd></div>
       </dl>
@@ -232,7 +245,7 @@
       <div class="stamp">Virtual<br>no real money</div>
       <div class="jars" id="jars">
         <figure><canvas id="jy" aria-label="Your jar"></canvas><figcaption>You <b id="ty">$5.40</b></figcaption></figure>
-        <figure><canvas id="jf" aria-label="Your friend's jar"></canvas><figcaption>Friend <b id="tf">$4.80</b></figcaption></figure>
+        <figure><canvas id="jf" aria-label="Your friend's jar"></canvas><figcaption>Friend <b id="tf">$3.20</b></figcaption></figure>
       </div>
       <p class="net" id="net">All square. Make your guess.</p>
       <p class="eg">Example month so far. Each jar holds $10. Your guesses above drop into it. It resets on the 1st.</p>
@@ -408,7 +421,7 @@
       g.lineWidth = 1.6; g.strokeStyle = '#fff'; g.beginPath(); g.moveTo(NL - 9, NT); g.lineTo(NL, NT); g.moveTo(NR, NT); g.lineTo(NR + 9, NT); g.stroke();
     }
   }
-  const jy = new Jar($('jy'), 540), jf = new Jar($('jf'), 480);          // example month so far: $5.40 vs $4.80
+  const jy = new Jar($('jy'), 540), jf = new Jar($('jf'), 320);          // example month so far: $5.40 vs $3.20
   const jars = [jy, jf];
   const money = c => '$' + (c / 100).toFixed(2);
   function tally(bumpEl) {
