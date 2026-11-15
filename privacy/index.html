@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; font-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Privacy — Hunchline</title>
+<meta name="description" content="How Hunchline handles your data: no ads, no tracking, no analytics.">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/icon.png">
+<link rel="preload" href="/fonts/bricolage-300-800-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Bricolage Grotesque latin-ext */ @font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 300 800; font-stretch: 75% 100%; font-display: swap; src: url(/fonts/bricolage-300-800-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Bricolage Grotesque latin */ @font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 300 800; font-stretch: 75% 100%; font-display: swap; src: url(/fonts/bricolage-300-800-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* DM Mono latin-ext */ @font-face { font-family: 'DM Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/dm-400-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* DM Mono latin */ @font-face { font-family: 'DM Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/dm-400-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* DM Mono latin-ext */ @font-face { font-family: 'DM Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/dm-500-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* DM Mono latin */ @font-face { font-family: 'DM Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/dm-500-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+  :root { --bg:#000; --fg:#fff; --fg2:#e6e6e6; --muted:#8a8a8a; --line:#2a2a2a; --line2:#3a3a3a; --accent:#f2c31b;
+    --display:"Bricolage Grotesque","Arial Narrow",Helvetica,Arial,sans-serif; --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--fg); }
+  body { font:500 17px/1.6 var(--display); font-variation-settings:"wdth" 100; -webkit-font-smoothing:antialiased; overflow-x:hidden; min-height:100svh;
+    padding:max(14px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; background:radial-gradient(560px 380px at 78% 8%, rgba(242,195,27,.10), transparent 70%); }
+  .wrap { position:relative; max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:30px; }
+  a { color:var(--fg); text-underline-offset:3px; } a:hover { color:var(--accent); }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+  header { display:flex; align-items:center; justify-content:space-between; }
+  .mark { font-weight:800; font-size:27px; letter-spacing:-.04em; position:relative; padding-top:9px; text-decoration:none; }
+  .mark::before { content:""; position:absolute; left:0; right:0; top:0; height:3px; border-radius:3px; background:var(--fg); }
+  .mark::after { content:""; position:absolute; top:-4px; left:64%; width:11px; height:11px; border-radius:50%; background:var(--accent); }
+  .tag { font:500 11.5px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); border:1.5px solid var(--line2); border-radius:999px; padding:6px 12px; text-decoration:none; }
+  .kicker { font:500 11.5px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:10px; }
+  .kicker i { width:28px; height:1.5px; background:var(--accent); }
+  h1 { margin:12px 0 0; font-weight:800; font-size:clamp(46px,12vw,88px); line-height:.94; letter-spacing:-.012em; font-variation-settings:"wdth" 84, "opsz" 96; text-wrap:balance; }
+  h1 em { font-style:normal; color:var(--accent); }
+  h2 { margin:0 0 8px; font-weight:800; font-size:clamp(22px,4.6vw,28px); line-height:1.1; letter-spacing:-.01em; font-variation-settings:"wdth" 90, "opsz" 48; }
+  section { border-top:1.5px solid var(--line); padding-top:22px; }
+  p { margin:0 0 12px; color:var(--fg2); max-width:62ch; text-wrap:pretty; } p:last-child { margin-bottom:0; }
+  ul { margin:0 0 12px; padding-left:1.15em; color:var(--fg2); max-width:62ch; } li { margin:0 0 6px; }
+  strong { color:var(--fg); font-weight:700; }
+  .lede { font-size:clamp(18px,4.8vw,21px); line-height:1.4; color:var(--fg2); max-width:40ch; }
+  dl.rows { margin:0; max-width:640px; } dl.rows div { display:grid; grid-template-columns:minmax(0,200px) minmax(0,1fr); gap:4px 16px; padding:10px 0; border-bottom:1px solid var(--line); }
+  dl.rows dt { font:500 12px var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding-top:4px; } dl.rows dd { margin:0; color:var(--fg); overflow-wrap:anywhere; }
+  .small { font:400 13px/1.5 var(--mono); color:var(--muted); }
+  .ph { background:var(--accent); color:#000; padding:0 .3em; border-radius:3px; font-weight:700; }
+  .qa h3 { margin:0 0 4px; font-size:19px; font-weight:800; letter-spacing:-.01em; color:var(--fg); } .qa > div { padding:14px 0; border-bottom:1px solid var(--line); }
+  footer { border-top:1.5px solid var(--line); padding-top:16px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font:400 12.5px var(--mono); color:var(--muted); }
+  footer a { color:var(--muted); } footer a:hover { color:var(--accent); }
+  @media (max-width:560px) { dl.rows div { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><a class="mark" href="/">hunchline</a><a class="tag" href="/">Home</a></header>
+  <div><div class="kicker"><i></i>Privacy policy</div><h1>Your data, <em>short</em></h1></div>
+
+  <p class="lede">Hunchline has no ads, no tracking and no analytics. We only keep what the game needs to work.</p>
+  <p class="small">Last updated: 15 November 2026</p>
+  <section>
+    <h2>Who is responsible</h2>
+    <p>Markus Enenkel, Einzelunternehmer, Hernalser Hauptstraße 150/2, 1170 Vienna, Austria.<br>Email: <a href="mailto:contact@hunchline.online">contact@hunchline.online</a>. See also the <a href="/impressum/">Impressum</a>.</p>
+  </section>
+  <section>
+    <h2>What we process, and why</h2>
+    <p><strong>In the app.</strong></p>
+    <ul>
+      <li><strong>A random account ID.</strong> Created when you first open the app, so you can play without signing up.</li>
+      <li><strong>Sign in with Apple (optional).</strong> If you link it, Apple gives us an identifier and, if you choose to share it, your email address or Apple's private relay address.</li>
+      <li><strong>Your display name and invite code.</strong> The name is up to 20 characters and you choose it. Your friend sees it, and so does anyone who opens an invite link containing your code.</li>
+      <li><strong>Your guesses</strong> with their time, and which days you played.</li>
+      <li><strong>The jar.</strong> If you play against a friend: the link between your two accounts, each side's running tally for the month, and the result of past months. The jar is virtual. No money is collected, held or paid by us.</li>
+      <li><strong>Push notifications (optional).</strong> If you allow them, your device's notification token, so we can tell you when your friend has played. You can turn this off in the app or in iOS Settings.</li>
+      <li><strong>Plus subscription.</strong> Whether you have Plus and when it expires. Apple handles the payment. We never see your card or Apple ID password.</li>
+    </ul>
+    <p>We use this to run the game and its features (GDPR Art. 6(1)(b)). Notifications rely on your consent (Art. 6(1)(a)).</p>
+    <p><strong>On this website.</strong> The website sets no cookies and uses no trackers. It remembers your US/Metric choice only while the tab is open. Our hosting provider (GitHub Pages) receives your IP address when you load a page. On an invite page, your IP address and the invite code also go to our database provider so the page can show who invited you. Both are needed to deliver the pages and keep them secure (Art. 6(1)(f)).</p>
+    <p><strong>Daily questions.</strong> They are prepared from public news with the help of an AI service. No personal data is sent to it.</p>
+  </section>
+  <section>
+    <h2>Who receives data</h2>
+    <ul>
+      <li><strong>Supabase</strong>: database, sign-in and server functions. Our project runs in the EU (Ireland).</li>
+      <li><strong>Apple</strong>: Sign in with Apple, push notifications and payments.</li>
+      <li><strong>GitHub</strong>: hosts the website (USA).</li>
+    </ul>
+    <p>These providers process data on our behalf or, in Apple's case, under their own terms. Where data goes to the USA, this relies on safeguards required by the GDPR, such as the EU–US Data Privacy Framework or standard contractual clauses. We do not sell data and do not share it for advertising.</p>
+  </section>
+  <section>
+    <h2>How long we keep it</h2>
+    <p>Until you delete your account. Write to <a href="mailto:contact@hunchline.online">contact@hunchline.online</a> and we delete your account and everything linked to it within 30 days. Past jar months are kept only as a result per month, and are removed with the account. The hosting provider keeps its own server logs under its own policy.</p>
+  </section>
+  <section>
+    <h2>Your rights</h2>
+    <p>You can ask us for access to your data, correction, deletion, restriction, a copy in a portable format, and you can object to processing. You can withdraw consent at any time. Write to <a href="mailto:contact@hunchline.online">contact@hunchline.online</a>.</p>
+    <p>You can also complain to the Austrian data protection authority: Datenschutzbehörde, Barichgasse 40–42, 1030 Vienna, <a href="https://www.dsb.gv.at">www.dsb.gv.at</a>. You may complain to the authority in your own country as well.</p>
+  </section>
+  <section>
+    <h2>Children</h2>
+    <p>Hunchline is rated 13+ on the App Store. In Austria, if you are under 14, please ask a parent or guardian before you use it.</p>
+  </section>
+  <section>
+    <h2>Changes</h2>
+    <p>If we change how we handle data, we update this page and its date. For material changes we also tell you in the app.</p>
+  </section>
+  <footer><span>© Hunchline</span><span><a href="/impressum/">Impressum</a> · <a href="/privacy/">Privacy</a> · <a href="/support/">Support</a></span></footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; font-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Support — Hunchline</title>
+<meta name="description" content="Help and contact for Hunchline.">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/icon.png">
+<link rel="preload" href="/fonts/bricolage-300-800-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Bricolage Grotesque latin-ext */ @font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 300 800; font-stretch: 75% 100%; font-display: swap; src: url(/fonts/bricolage-300-800-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Bricolage Grotesque latin */ @font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 300 800; font-stretch: 75% 100%; font-display: swap; src: url(/fonts/bricolage-300-800-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* DM Mono latin-ext */ @font-face { font-family: 'DM Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/dm-400-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* DM Mono latin */ @font-face { font-family: 'DM Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/dm-400-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* DM Mono latin-ext */ @font-face { font-family: 'DM Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/dm-500-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* DM Mono latin */ @font-face { font-family: 'DM Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/dm-500-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+  :root { --bg:#000; --fg:#fff; --fg2:#e6e6e6; --muted:#8a8a8a; --line:#2a2a2a; --line2:#3a3a3a; --accent:#f2c31b;
+    --display:"Bricolage Grotesque","Arial Narrow",Helvetica,Arial,sans-serif; --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--fg); }
+  body { font:500 17px/1.6 var(--display); font-variation-settings:"wdth" 100; -webkit-font-smoothing:antialiased; overflow-x:hidden; min-height:100svh;
+    padding:max(14px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); }
+  body::before { content:""; position:fixed; inset:0; pointer-events:none; background:radial-gradient(560px 380px at 78% 8%, rgba(242,195,27,.10), transparent 70%); }
+  .wrap { position:relative; max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:30px; }
+  a { color:var(--fg); text-underline-offset:3px; } a:hover { color:var(--accent); }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+  header { display:flex; align-items:center; justify-content:space-between; }
+  .mark { font-weight:800; font-size:27px; letter-spacing:-.04em; position:relative; padding-top:9px; text-decoration:none; }
+  .mark::before { content:""; position:absolute; left:0; right:0; top:0; height:3px; border-radius:3px; background:var(--fg); }
+  .mark::after { content:""; position:absolute; top:-4px; left:64%; width:11px; height:11px; border-radius:50%; background:var(--accent); }
+  .tag { font:500 11.5px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); border:1.5px solid var(--line2); border-radius:999px; padding:6px 12px; text-decoration:none; }
+  .kicker { font:500 11.5px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:10px; }
+  .kicker i { width:28px; height:1.5px; background:var(--accent); }
+  h1 { margin:12px 0 0; font-weight:800; font-size:clamp(46px,12vw,88px); line-height:.94; letter-spacing:-.012em; font-variation-settings:"wdth" 84, "opsz" 96; text-wrap:balance; }
+  h1 em { font-style:normal; color:var(--accent); }
+  h2 { margin:0 0 8px; font-weight:800; font-size:clamp(22px,4.6vw,28px); line-height:1.1; letter-spacing:-.01em; font-variation-settings:"wdth" 90, "opsz" 48; }
+  section { border-top:1.5px solid var(--line); padding-top:22px; }
+  p { margin:0 0 12px; color:var(--fg2); max-width:62ch; text-wrap:pretty; } p:last-child { margin-bottom:0; }
+  ul { margin:0 0 12px; padding-left:1.15em; color:var(--fg2); max-width:62ch; } li { margin:0 0 6px; }
+  strong { color:var(--fg); font-weight:700; }
+  .lede { font-size:clamp(18px,4.8vw,21px); line-height:1.4; color:var(--fg2); max-width:40ch; }
+  dl.rows { margin:0; max-width:640px; } dl.rows div { display:grid; grid-template-columns:minmax(0,200px) minmax(0,1fr); gap:4px 16px; padding:10px 0; border-bottom:1px solid var(--line); }
+  dl.rows dt { font:500 12px var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding-top:4px; } dl.rows dd { margin:0; color:var(--fg); overflow-wrap:anywhere; }
+  .small { font:400 13px/1.5 var(--mono); color:var(--muted); }
+  .ph { background:var(--accent); color:#000; padding:0 .3em; border-radius:3px; font-weight:700; }
+  .qa h3 { margin:0 0 4px; font-size:19px; font-weight:800; letter-spacing:-.01em; color:var(--fg); } .qa > div { padding:14px 0; border-bottom:1px solid var(--line); }
+  footer { border-top:1.5px solid var(--line); padding-top:16px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font:400 12.5px var(--mono); color:var(--muted); }
+  footer a { color:var(--muted); } footer a:hover { color:var(--accent); }
+  @media (max-width:560px) { dl.rows div { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><a class="mark" href="/">hunchline</a><a class="tag" href="/">Home</a></header>
+  <div><div class="kicker"><i></i>Support</div><h1>How can we <em>help?</em></h1></div>
+
+  <p class="lede">Questions, a wrong answer, or a problem with the app? Write to us.</p>
+  <section>
+    <h2>Contact</h2>
+    <p><a href="mailto:contact@hunchline.online">contact@hunchline.online</a><br><span class="small">We usually reply within a few working days.</span></p>
+  </section>
+  <section class="qa">
+    <h2>Common questions</h2>
+    <div><h3>Is the jar real money?</h3><p>No. The jar is a virtual tally between you and your friend. Nothing is paid, collected or held in the app. The one who is further off at the end of the month treats the other to a drink, a movie or anything else. It resets on the 1st of every month.</p></div>
+    <div><h3>How do I play with a friend?</h3><p>Open the Jar tab, share your invite link or code, and your friend enters it. Each of you plays the same daily question.</p></div>
+    <div><h3>Where do I manage or cancel Plus?</h3><p>Apple handles subscriptions. On your iPhone, open Settings, tap your name, then Subscriptions. For refunds, use <a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a>.</p></div>
+    <div><h3>How do I turn notifications off?</h3><p>In the iPhone Settings app, open Notifications, then Hunchline.</p></div>
+    <div><h3>A question or answer looks wrong.</h3><p>Email us the question and a link to a source. We check every report.</p></div>
+    <div><h3>How do I delete my account and data?</h3><p>Email us from any address and say you want your account deleted. We delete it and everything linked to it within 30 days.</p></div>
+  </section>
+  <section>
+    <h2>More</h2>
+    <p><a href="/privacy/">Privacy policy</a> · <a href="/impressum/">Impressum</a></p>
+  </section>
+  <footer><span>© Hunchline</span><span><a href="/impressum/">Impressum</a> · <a href="/privacy/">Privacy</a> · <a href="/support/">Support</a></span></footer>
+</div>
+</body>
+</html>
