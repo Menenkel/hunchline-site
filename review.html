@@ -57,6 +57,10 @@
   .status.bad { color: var(--bad); }
   .undo { font-size: 12px; color: var(--muted); }
   #list { display: flex; flex-direction: column; gap: 14px; }
+  .group-head { display: flex; justify-content: space-between; align-items: baseline; margin: 14px 0 0; }
+  .group-head h2 { font-size: 17px; margin: 0; }
+  .group-head .count { font-size: 12px; font-weight: 700; color: var(--muted); }
+  .group-head .count.full { color: var(--accent); }
   .empty, .error { color: var(--muted); font-size: 14px; text-align: center; padding: 40px 12px; }
   .error { color: var(--bad); }
   [hidden] { display: none !important; }
@@ -92,6 +96,16 @@
 
   const $ = (id) => document.getElementById(id);
   let candidates = [];
+  let archiveCounts = {};
+  const ARCHIVE_TARGET = 3;
+
+  function updateGroupCount(category) {
+    const node = document.querySelector(`[data-count-for="${CSS.escape(category)}"]`);
+    if (!node) return;
+    const n = archiveCounts[category] || 0;
+    node.textContent = `${n} of ${ARCHIVE_TARGET} in archive`;
+    node.classList.toggle("full", n >= ARCHIVE_TARGET);
+  }
 
   function el(tag, attrs = {}, text) {
     const node = document.createElement(tag);
@@ -233,6 +247,10 @@
     if (action === "reject" && !confirm("Reject and delete this question?")) return;
     const body = await send(c, card, { action });
     if (body) {
+      if (body.state === "archived" && c.state !== "archived") {
+        archiveCounts[c.category] = (archiveCounts[c.category] || 0) + 1;
+        updateGroupCount(c.category);
+      }
       c.state = body.state || c.state;
       paint(c, card, "✓ " + body.message.replace(/\.$/, ""));
       updateSummary();
@@ -251,11 +269,26 @@
       const body = await res.json().catch(() => ({}));
       if (!res.ok) return showError(body.error || `Couldn't load the questions (${res.status}).`);
       candidates = body.candidates || [];
+      archiveCounts = body.archive_counts || {};
       $("loading").hidden = true;
       if (!candidates.length) {
         $("list").append(el("p", { class: "empty" }, "No questions left for this day. Rejected ones are gone; older undecided ones are deleted after 7 days."));
       }
-      for (const c of candidates) $("list").append(render(c));
+      // Grouped by category, emptiest archive first, best questions first.
+      const groups = new Map();
+      for (const c of candidates) {
+        if (!groups.has(c.category)) groups.set(c.category, []);
+        groups.get(c.category).push(c);
+      }
+      const ordered = [...groups.keys()].sort((a, b) => (archiveCounts[a] || 0) - (archiveCounts[b] || 0));
+      for (const category of ordered) {
+        const head = el("div", { class: "group-head" });
+        head.append(el("h2", {}, category));
+        head.append(el("span", { class: "count", "data-count-for": category }));
+        $("list").append(head);
+        updateGroupCount(category);
+        for (const c of groups.get(category)) $("list").append(render(c));
+      }
       updateSummary();
     } catch {
       showError("Couldn't reach Hunchline. Check your connection and reload.");
