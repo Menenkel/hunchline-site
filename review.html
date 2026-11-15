@@ -271,6 +271,9 @@
 
   // ---- Archive view ----------------------------------------------------
 
+  const CATEGORIES = ["Fun or Fails", "Space", "Animal Kingdom", "Human Body", "Planet Earth", "Tech & Data",
+    "Money & Scale", "Sports Records", "Pop Culture", "Human Engineering", "Physics & Energy"];
+
   const ARCHIVE_STATE = {
     archived: "In the archive · not played yet",
     played: "In the archive",
@@ -387,19 +390,20 @@
     const visible = questions.filter((q) => q.state !== "hidden").length;
     const flagged = questions.filter((q) => q.source_issue && q.state !== "hidden").length;
     $("summary").textContent = `${visible} in the archive` + (flagged ? ` · ${flagged} with a source problem` : "");
-    const groups = new Map();
+    // Every category, so empty ones show up as gaps to fill.
+    const groups = new Map(CATEGORIES.map((c) => [c, []]));
     for (const q of questions) {
       if (!groups.has(q.category)) groups.set(q.category, []);
       groups.get(q.category).push(q);
     }
     const ordered = [...groups.keys()].sort((a, b) => (archiveCounts[a] || 0) - (archiveCounts[b] || 0) || a.localeCompare(b));
-    if (!ordered.length) $("list").append(el("p", { class: "empty" }, "The archive is empty."));
     for (const category of ordered) {
       const head = el("div", { class: "group-head" });
       head.append(el("h2", {}, category));
       head.append(el("span", { class: "count", "data-count-for": category }));
       $("list").append(head);
       updateGroupCount(category);
+      if (!groups.get(category).length) $("list").append(el("p", { class: "summary" }, "Nothing archived yet."));
       for (const q of groups.get(category)) $("list").append(renderArchive(q));
     }
   }
