@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Hunchline — guess the news</title>
+<title>Hunchline — guess what's news</title>
 <meta name="description" content="Guess one number from today's news, see how sharp your hunch was, and keep a virtual jar with a friend. The drinks are real, the money isn't.">
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
@@ -46,7 +46,9 @@
 
   /* ---------- hero + demo ---------- */
   .hero { padding:44px 0 6px; }
-  h1 { margin:14px 0 0; font-weight:800; font-size:clamp(50px, 10.2vw, 118px); line-height:.92; letter-spacing:-.012em; font-variation-settings:"wdth" 84, "opsz" 96; text-wrap:balance; }
+  .deck { margin:22px 0 0; max-width:34ch; font-size:clamp(18px,2.3vw,24px); line-height:1.25; color:var(--fg2); font-weight:500; text-wrap:balance; }
+  .deck b { color:var(--fg); font-weight:800; }
+  h1 { margin:14px 0 0; font-weight:800; font-size:clamp(58px, 13.4vw, 176px); line-height:.92; letter-spacing:-.012em; font-variation-settings:"wdth" 84, "opsz" 96; text-wrap:balance; }
   h1 em { font-style:normal; color:var(--accent); }
 
   .stage { padding-top:38px; }
@@ -81,6 +83,9 @@
   .ticks span { position:absolute; transform:translateX(-50%); }
   .ticks span:first-child { transform:none; } .ticks span:last-child { transform:translateX(-100%); }
 
+  .burst { position:absolute; inset:0; border-radius:50%; border:3px solid #fff; animation:burst .6s ease-out forwards; pointer-events:none; }
+  @keyframes burst { from { transform:scale(1); opacity:1; } to { transform:scale(2.8); opacity:0; } }
+  #fly { position:absolute; left:0; top:0; width:56px; height:56px; margin:-28px 0 0 -28px; border-radius:50%; background:var(--accent); box-shadow:0 0 40px rgba(242,195,27,.8); z-index:30; pointer-events:none; }
   .row { display:flex; align-items:center; gap:14px; margin-top:22px; flex-wrap:wrap; }
   .btn { font:700 14px var(--display); font-variation-settings:"wdth" 100, "opsz" 14; letter-spacing:.1em; text-transform:uppercase; border:0; cursor:pointer; background:var(--fg); color:#000; height:54px; padding:0 28px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:10px; text-decoration:none; transition:transform .15s, opacity .15s, box-shadow .2s; }
   .btn:hover { transform:translateY(-2px); } .btn:active { opacity:.7; transform:none; }
@@ -118,10 +123,12 @@
   .jars { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   figure { margin:0; text-align:center; }
   canvas { width:100%; max-width:240px; height:auto; display:block; margin:0 auto; }
+  figure.jolt canvas { animation:jolt .5s cubic-bezier(.3,1.5,.5,1); }
+  @keyframes jolt { 0% { transform:translateY(0) rotate(0); } 30% { transform:translateY(6px) rotate(-1.2deg); } 65% { transform:translateY(-4px) rotate(.8deg); } 100% { transform:none; } }
   figcaption { font:500 11px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:2px; margin-top:2px; }
   figcaption b { font:800 clamp(34px,5vw,52px)/1 var(--display); letter-spacing:-.01em; color:var(--fg); font-variant-numeric:tabular-nums; font-variation-settings:"wdth" 92, "opsz" 96; transition:transform .25s cubic-bezier(.3,1.6,.5,1), color .25s; }
   figcaption b.bump { transform:scale(1.18); color:var(--accent); }
-  .stamp { position:absolute; left:50%; top:26%; transform:translate(-50%,-50%) rotate(-8deg); z-index:2; font:500 11px/1.25 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); border:1.5px solid var(--accent); border-radius:6px; padding:7px 10px; background:rgba(0,0,0,.82); text-align:center; white-space:nowrap; pointer-events:none; }
+  .stamp { position:absolute; left:50%; top:30px; transform:translate(-50%,-50%) rotate(-7deg); z-index:2; font:500 11px/1.25 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); border:1.5px solid var(--accent); border-radius:6px; padding:7px 10px; background:rgba(0,0,0,.82); text-align:center; white-space:nowrap; pointer-events:none; }
   .net { margin:20px 0 0; text-align:center; font:500 14px var(--mono); letter-spacing:.04em; color:var(--fg); }
   .eg { margin:6px 0 0; text-align:center; font:400 11px var(--mono); letter-spacing:.04em; color:var(--muted); }
 
@@ -141,7 +148,7 @@
     .result, .jar { grid-template-columns:1fr; }
     .jar { gap:36px; margin-top:64px; }
     .dl { margin-top:64px; } .dl .btn { width:100%; padding:0 16px; letter-spacing:.06em; }
-    .stamp { top:22%; }
+    .stamp { top:24px; font-size:10px; padding:5px 8px; }
   }
   @media (prefers-reduced-motion:reduce) { *{animation:none!important; transition:none!important;} }
 </style>
@@ -154,8 +161,9 @@
   </header>
 
   <section class="hero">
-    <div class="kicker"><i></i>One number from today's news</div>
-    <h1>Guess the news.<br><em>Settle it in person.</em></h1>
+    <div class="kicker"><i></i>A daily game for you and a friend</div>
+    <h1>Guess what's <em>News?</em></h1>
+    <p class="deck">One number from today's news. Whoever's further off buys the drinks. <b>In person.</b></p>
   </section>
 
   <section class="stage pulse" id="stage" aria-label="Try it">
@@ -212,7 +220,7 @@
     <div>
       <div class="kicker"><i></i>The jar</div>
       <h2>The jar is pretend.<br><em>The drinks are real.</em></h2>
-      <p class="lead">Play against one friend. Each time you're further off than they are, $0.10 drops on your side of the jar. It's a running tally between the two of you and nothing more. No payments, no cards, no cash in the app.</p>
+      <p class="lead">Play against one friend. Each time you're further off than they are, $0.10 drops on your side of the jar. It's a running tally between the two of you and nothing more. No payments, no cards, no cash in the app. The game is the excuse. The evening is the point.</p>
       <dl class="ledger">
         <div><dt>Each miss</dt><dd>$0.10 on your side</dd></div>
         <div><dt>Last day of the month</dt><dd>Whoever's behind buys</dd></div>
@@ -222,12 +230,12 @@
     </div>
     <div class="jar-art">
       <div class="stamp">Virtual<br>no real money</div>
-      <div class="jars">
-        <figure><canvas id="jy" aria-label="Your jar"></canvas><figcaption>You <b id="ty">$1.60</b></figcaption></figure>
-        <figure><canvas id="jf" aria-label="Your friend's jar"></canvas><figcaption>Friend <b id="tf">$1.60</b></figcaption></figure>
+      <div class="jars" id="jars">
+        <figure><canvas id="jy" aria-label="Your jar"></canvas><figcaption>You <b id="ty">$5.40</b></figcaption></figure>
+        <figure><canvas id="jf" aria-label="Your friend's jar"></canvas><figcaption>Friend <b id="tf">$4.80</b></figcaption></figure>
       </div>
       <p class="net" id="net">All square. Make your guess.</p>
-      <p class="eg">Example month so far. Your guesses above drop into it. The jar resets on the 1st.</p>
+      <p class="eg">Example month so far. Each jar holds $10. Your guesses above drop into it. It resets on the 1st.</p>
     </div>
   </section>
 
@@ -297,8 +305,10 @@
     sl.setAttribute('aria-valuemin', Math.pow(10, lo)); sl.setAttribute('aria-valuemax', Math.pow(10, hi));
     render();
   }
+  let lastDec = null, dragging = false;
   function render() {
-    const w = rail.clientWidth, v = valOf(t), Q = QS[qi];
+    const w = rail.clientWidth, v = valOf(t), Q = QS[qi], dec = Math.floor(lo + t * (hi - lo) + 1e-9);
+    if (dragging && lastDec !== null && dec !== lastDec) haptic(8); lastDec = dec;
     kn.style.left = (t * w) + 'px';
     out.textContent = fmt(v);
     $('conv').textContent = Q.imp.unit === Q.met.unit ? '' : '≈ ' + fmtC(v / f * (sys === 'imp' ? Q.met.f : Q.imp.f)) + ' ' + (sys === 'imp' ? Q.met.unit : Q.imp.unit);
@@ -306,8 +316,8 @@
     document.body.style.setProperty('--kx', (rail.getBoundingClientRect().left + t * w) + 'px');
   }
   function setFromX(x) { const r = rail.getBoundingClientRect(); t = Math.min(1, Math.max(0, (x - r.left) / r.width)); render(); }
-  sl.addEventListener('pointerdown', e => { if (locked) return; stage.classList.remove('pulse'); sl.setPointerCapture(e.pointerId); setFromX(e.clientX); sl.onpointermove = ev => setFromX(ev.clientX); });
-  sl.addEventListener('pointerup', () => { sl.onpointermove = null; });
+  sl.addEventListener('pointerdown', e => { if (locked) return; stage.classList.remove('pulse'); sl.setPointerCapture(e.pointerId); dragging = true; setFromX(e.clientX); sl.onpointermove = ev => setFromX(ev.clientX); });
+  sl.addEventListener('pointerup', () => { dragging = false; sl.onpointermove = null; });
   sl.addEventListener('keydown', e => { if (locked) return; const st = e.shiftKey ? .05 : .01; if (e.key === 'ArrowRight' || e.key === 'ArrowUp') t = Math.min(1, t + st); else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') t = Math.max(0, t - st); else return; e.preventDefault(); stage.classList.remove('pulse'); render(); });
   document.querySelectorAll('#tog button').forEach(b => b.onclick = () => {
     if (b.dataset.s === sys) return;
@@ -315,7 +325,7 @@
     sys = b.dataset.s; try { sessionStorage.setItem('hl-sys', sys); } catch (e) {}
     const was = locked; load(qi);
     t = Math.min(1, Math.max(0, tOf(keep * f))); render();
-    if (was) reshow();
+    if (was && lastOutcome) { locked = true; stage.classList.add('done'); ans.style.opacity = 1; paintResult(false); }
   });
 
   /* ---------- crowd curve (modelled) ---------- */
@@ -341,98 +351,139 @@
   const off = (g, a) => Math.abs(Math.log10(g / a));            // distance from the answer on the log scale
   const ratioOf = (g, a) => Math.pow(10, off(g, a));
 
-  /* ---------- the jars: yellow dots with a little physics ---------- */
-  const CX = 100, FLOOR = 230, R = 12, NECK = 30, BODY = 78;
-  const hw = y => y <= 62 ? NECK : y >= 104 ? BODY : NECK + (BODY - NECK) * (s => s * s * (3 - 2 * s))((y - 62) / 42);
-
+  /* ---------- the jars: measuring jars of golden liquid ---------- */
+  const NL = 46, NR = 154, NT = 44, BL = 26, BR = 174, BB = 230, YE = 228, CAP = 144;   // jar geometry (logical 200x250); CAP px = $10
+  const jarPath = (g, close) => {
+    g.beginPath(); g.moveTo(NL, NT); g.lineTo(NL, 66); g.quadraticCurveTo(NL, 84, BL, 92); g.lineTo(BL, 208);
+    g.arcTo(BL, BB, BL + 22, BB, 22); g.lineTo(BR - 22, BB); g.arcTo(BR, BB, BR, 208, 22); g.lineTo(BR, 92);
+    g.quadraticCurveTo(NR, 84, NR, 66); g.lineTo(NR, NT); if (close) g.closePath();
+  };
   class Jar {
-    constructor(canvas) {
-      this.c = canvas; this.balls = []; this.last = -1; this.id = 0; this.awake = false; this.rest = 0;
-      this.dpr = Math.min(2, window.devicePixelRatio || 1);
-      canvas.width = 200 * this.dpr; canvas.height = 250 * this.dpr;
-      this.g = canvas.getContext('2d'); this.g.scale(this.dpr, this.dpr);
+    constructor(canvas, cents) {
+      this.c = canvas; this.fig = canvas.parentElement; this.dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = 200 * this.dpr; canvas.height = 250 * this.dpr; this.g = canvas.getContext('2d'); this.g.scale(this.dpr, this.dpr);
+      this.cents = cents; this.lvl = this.tgt = cents / 1000; this.amp = 1.2; this.ph = Math.random() * 6; this.visible = true;
+      this.drops = []; this.parts = []; this.bubs = [];
+      for (let k = 0; k < 9; k++) this.bubs.push({ x: 40 + Math.random() * 120, y: 120 + Math.random() * 100, r: 1.5 + Math.random() * 2.2, v: .15 + Math.random() * .3 });
     }
-    add(n, stagger) { for (let i = 0; i < n; i++) { const x = CX + (Math.random() - .5) * 14, y = -14 - i * stagger; this.balls.push({ x, y, px: x, py: y - 3, id: this.id++ }); } this.last = this.id - 1; this.wake(); }
-    wake() { this.rest = 0; if (!this.awake) { this.awake = true; requestAnimationFrame(() => this.loop()); } }
-    get count() { return this.balls.length; }
-    step() {
-      const B = this.balls; let move = 0;
-      for (const b of B) {
-        const vx = (b.x - b.px) * .995, vy = (b.y - b.py) * .995 + .45;
-        b.px = b.x; b.py = b.y; b.x += Math.max(-12, Math.min(12, vx)); b.y += Math.max(-12, Math.min(12, vy));
-      }
-      for (let it = 0; it < 6; it++) {
-        for (let i = 0; i < B.length; i++) for (let j = i + 1; j < B.length; j++) {
-          const a = B[i], b = B[j], dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
-          if (d2 < 4 * R * R && d2 > 1e-6) { const d = Math.sqrt(d2), k = (2 * R - d) / d * .5; a.x -= dx * k; a.y -= dy * k; b.x += dx * k; b.y += dy * k; }
-        }
-        for (const b of B) {
-          const lim = hw(b.y) - R; b.x = Math.max(CX - lim, Math.min(CX + lim, b.x));
-          if (b.y > FLOOR - R) b.y = FLOOR - R;
-          if (b.y > 206) { const sx = b.x < CX ? -1 : 1, dx = Math.abs(b.x - CX) - 52, dy = b.y - 206;
-            if (dx > 0) { const d = Math.hypot(dx, dy), L = 24 - R; if (d > L) { b.x = CX + sx * (52 + dx * L / d); b.y = 206 + dy * L / d; } } }
-        }
-      }
-      for (const b of B) move += Math.abs(b.x - b.px) + Math.abs(b.y - b.py);
-      return move;
+    get y0() { return YE - Math.min(1.04, this.lvl) * CAP; }
+    drop() { this.drops.push({ x: 100, y: NT - 2, vy: 1 }); }      // a dot starts falling from the mouth
+    tick() {
+      this.ph += REDUCED ? 0 : .05; this.amp = 1.2 + (this.amp - 1.2) * .965; this.lvl += (this.tgt - this.lvl) * .07;
+      for (const d of this.drops) { d.vy += .75; d.y += d.vy; if (d.y >= this.y0) { d.hit = true; this.splash(d.x); } }
+      this.drops = this.drops.filter(d => !d.hit);
+      for (const p of this.parts) { p.vy += .35; p.x += p.vx; p.y += p.vy; p.life--; }
+      this.parts = this.parts.filter(p => p.life > 0 && p.y < this.y0 + 4);
+      for (const b of this.bubs) { b.y -= b.v; if (b.y < this.y0 + 6) { b.y = YE - 6 - Math.random() * 20; b.x = 40 + Math.random() * 120; } }
     }
-    loop() {
-      const m = this.step(); this.draw();
-      this.rest = m < .02 * Math.max(1, this.balls.length) ? this.rest + 1 : 0;
-      if (this.rest > 40) { this.awake = false; return; }
-      requestAnimationFrame(() => this.loop());
+    splash(x) {
+      this.amp = 8; this.tgt += .01; this.cents += 10;
+      for (let k = 0; k < 7; k++) this.parts.push({ x: x + (Math.random() - .5) * 10, y: this.y0, vx: (Math.random() - .5) * 3.4, vy: -2.5 - Math.random() * 4, r: 1.6 + Math.random() * 2.2, life: 40 });
+      for (let k = 0; k < 6; k++) this.bubs.push({ x: x + (Math.random() - .5) * 26, y: this.y0 + 6 + Math.random() * 14, r: 1.2 + Math.random() * 2, v: .5 + Math.random() * .6 });
+      if (this.bubs.length > 26) this.bubs.splice(0, this.bubs.length - 26);
+      if (this.onLand) this.onLand(this);
     }
-    settle() { for (let i = 0; i < 520; i++) this.step(); this.draw(); }
+    ruler(g, col) {
+      g.fillStyle = col; g.strokeStyle = col; g.lineWidth = 1.2; g.font = '500 8px "DM Mono", monospace'; g.textAlign = 'left'; g.textBaseline = 'middle';
+      for (let k = 2; k <= 10; k += 2) { const y = YE - CAP * k / 10; g.beginPath(); g.moveTo(BL + 2, y); g.lineTo(BL + 12, y); g.stroke(); g.fillText('$' + k, BL + 15, y); }
+      for (let k = 1; k < 10; k += 2) { const y = YE - CAP * k / 10; g.beginPath(); g.moveTo(BL + 2, y); g.lineTo(BL + 7, y); g.stroke(); }
+    }
     draw() {
-      const g = this.g; g.clearRect(0, 0, 200, 250);
-      g.fillStyle = '#f2c31b';
-      for (const b of this.balls) { g.beginPath(); g.arc(b.x, b.y, R - .5, 0, 7); g.fill(); }
-      const lb = this.balls.find(b => b.id === this.last);
-      if (lb && this.id > 16) { g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(lb.x, lb.y, R + 3, 0, 7); g.stroke(); }
-      g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.lineCap = 'round'; g.lineJoin = 'round';
-      g.beginPath();
-      g.moveTo(CX - 46, 27); g.lineTo(CX - 34, 28); g.lineTo(CX - 34, 62);
-      g.bezierCurveTo(CX - 34, 88, CX - 82, 84, CX - 82, 108); g.lineTo(CX - 82, 206);
-      g.arcTo(CX - 82, 232, CX - 56, 232, 26); g.lineTo(CX + 56, 232); g.arcTo(CX + 82, 232, CX + 82, 206, 26);
-      g.lineTo(CX + 82, 108); g.bezierCurveTo(CX + 82, 84, CX + 34, 88, CX + 34, 62); g.lineTo(CX + 34, 28); g.lineTo(CX + 46, 27);
-      g.stroke();
-      g.strokeStyle = 'rgba(255,255,255,.2)'; g.lineWidth = 3; g.beginPath(); g.moveTo(CX - 70, 130); g.lineTo(CX - 70, 196); g.stroke();
+      const g = this.g, y0 = this.y0; g.clearRect(0, 0, 200, 250);
+      this.ruler(g, 'rgba(255,255,255,.75)');
+      g.save(); jarPath(g, true); g.clip();
+      g.fillStyle = 'rgba(242,195,27,.5)'; g.beginPath(); g.moveTo(0, 260);
+      for (let x = 0; x <= 200; x += 4) g.lineTo(x, y0 + this.amp * .8 * Math.sin(x * .045 + this.ph * .8 + 1.7) - 1.5); g.lineTo(200, 260); g.fill();
+      g.fillStyle = '#f2c31b'; g.beginPath(); g.moveTo(0, 260);
+      for (let x = 0; x <= 200; x += 4) g.lineTo(x, y0 + this.amp * Math.sin(x * .06 - this.ph)); g.lineTo(200, 260); g.fill();
+      g.fillStyle = 'rgba(0,0,0,.16)'; for (const b of this.bubs) { g.beginPath(); g.arc(b.x, b.y, b.r, 0, 7); g.fill(); }
+      g.fillStyle = 'rgba(255,255,255,.4)'; g.fillRect(BL + 34, y0 + 12, 4, Math.max(0, YE - y0 - 26));
+      g.save(); g.beginPath(); g.rect(0, y0 + 2, 200, 260); g.clip(); this.ruler(g, '#000'); g.restore();
+      g.restore();
+      g.fillStyle = '#f2c31b'; for (const d of this.drops) { g.beginPath(); g.arc(d.x, d.y, 8, 0, 7); g.fill(); }
+      for (const p of this.parts) { g.globalAlpha = Math.min(1, p.life / 20); g.beginPath(); g.arc(p.x, p.y, p.r, 0, 7); g.fill(); } g.globalAlpha = 1;
+      g.strokeStyle = '#fff'; g.lineWidth = 1.6; g.lineCap = 'round'; g.lineJoin = 'round';
+      jarPath(g, false); g.stroke();
+      g.lineWidth = 1; g.strokeStyle = 'rgba(255,255,255,.4)'; g.beginPath(); g.moveTo(NL, 51); g.lineTo(NR, 51); g.moveTo(NL, 57); g.lineTo(NR, 57); g.stroke();
+      g.lineWidth = 1.6; g.strokeStyle = '#fff'; g.beginPath(); g.moveTo(NL - 9, NT); g.lineTo(NL, NT); g.moveTo(NR, NT); g.lineTo(NR + 9, NT); g.stroke();
     }
   }
-  const jy = new Jar($('jy')), jf = new Jar($('jf'));
-  jy.add(16, 28); jf.add(16, 28); jy.settle(); jf.settle();           // example month so far: $1.60 each
-  const cents = n => '$' + (n * .1).toFixed(2);
+  const jy = new Jar($('jy'), 540), jf = new Jar($('jf'), 480);          // example month so far: $5.40 vs $4.80
+  const jars = [jy, jf];
+  const money = c => '$' + (c / 100).toFixed(2);
   function tally(bumpEl) {
-    $('ty').textContent = cents(jy.count); $('tf').textContent = cents(jf.count);
-    if (bumpEl) { bumpEl.classList.add('bump'); setTimeout(() => bumpEl.classList.remove('bump'), 350); }
-    const d = jy.count - jf.count, amt = cents(Math.abs(d));
+    $('ty').textContent = money(jy.cents); $('tf').textContent = money(jf.cents);
+    if (bumpEl) { bumpEl.classList.add('bump'); setTimeout(() => bumpEl.classList.remove('bump'), 380); }
+    const d = jy.cents - jf.cents, amt = money(Math.abs(d));
     $('net').textContent = d === 0 ? 'All square. Make your guess.' : d > 0 ? `You're ${amt} behind. You're buying.` : `Friend's ${amt} behind. They're buying.`;
   }
   tally();
-  const MAXB = 56;
+  let running = false;
+  const frame = () => { jars.forEach(j => { if (j.visible) { j.tick(); j.draw(); } }); requestAnimationFrame(frame); };
+  if ('IntersectionObserver' in window) { const io = new IntersectionObserver(es => es.forEach(e => { jars.find(j => j.c === e.target).visible = e.isIntersecting; }), { rootMargin: '120px' }); jars.forEach(j => io.observe(j.c)); }
+  jars.forEach(j => j.draw()); requestAnimationFrame(frame);
 
-  /* ---------- lock in: you vs a sample friend ---------- */
-  let lastOutcome = null;
-  function reshow() { $('lock').onclick(); }
-  $('lock').onclick = () => {
-    const first = !locked; locked = true; stage.classList.add('done');
+  /* ---------- haptics: Android vibrates; iPhone Safari gets a best-effort tap ---------- */
+  let sw;
+  function haptic(p) {
+    if (REDUCED) return;
+    try { if (navigator.vibrate) { navigator.vibrate(p); return; } } catch (e) {}
+    try {
+      if (!sw) { sw = document.createElement('label'); sw.style.cssText = 'position:fixed;left:-99px;top:0;opacity:0;pointer-events:none'; sw.innerHTML = '<input type="checkbox" switch>'; document.body.appendChild(sw); }
+      sw.click();
+    } catch (e) {}
+  }
+
+  /* ---------- lock in: slam, count up, then the dot flies into the loser's jar ---------- */
+  let lastOutcome = null, flyTimer = 0;
+  const verdictHTML = r => r < 1.1 ? 'Dead on. <em>Wow.</em>' : r < 2 ? `<em>${r.toFixed(1)}×</em> off. Close.` : `<em>${r < 10 ? r.toFixed(1) : Math.round(r)}×</em> off.`;
+  function paintResult(animate) {
     const Q = QS[qi], v = valOf(t), vb = v / f, ratio = ratioOf(vb, Q.a);
-    place(); ans.style.opacity = 1;
-    $('verdict').innerHTML = ratio < 1.1 ? 'Dead on. <em>Wow.</em>' : ratio < 2 ? `<em>${ratio.toFixed(1)}×</em> off. Close.` : `<em>${ratio < 10 ? ratio.toFixed(1) : Math.round(ratio)}×</em> off.`;
+    place();
+    if (animate && !REDUCED && ratio >= 1.1) {
+      const t0 = performance.now(), D = 700, step = now => { const u = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - u, 3); $('verdict').innerHTML = u < 1 ? verdictHTML(1.1 + (ratio - 1.1) * e).replace(/\s?Close\./, '') : verdictHTML(ratio); if (u < 1) requestAnimationFrame(step); }; requestAnimationFrame(step);
+    } else $('verdict').innerHTML = verdictHTML(ratio);
     $('sub').innerHTML = `You said ${both(vb)}. It's ${both(Q.a)}. <a href="${Q.url}" target="_blank" rel="noopener">${Q.src} ↗</a><br>Closer than ~${beats(vb)}% of typical guesses (est.)`;
-    if (first || !lastOutcome) {
-      const fg = Q.med * Math.pow(10, Q.sd * randn()), fr = ratioOf(fg, Q.a);
-      lastOutcome = { fr, you: off(vb, Q.a), fr10: off(fg, Q.a) };
-      const youMiss = lastOutcome.you > lastOutcome.fr10, tie = Math.abs(lastOutcome.you - lastOutcome.fr10) < .01;
-      lastOutcome.who = tie ? 'tie' : youMiss ? 'you' : 'friend';
-      if (!tie) { const j = youMiss ? jy : jf; if (j.count < MAXB) j.add(1, 0); tally($(youMiss ? 'ty' : 'tf')); }
-    }
     const o = lastOutcome, fx = o.fr < 10 ? o.fr.toFixed(1) : Math.round(o.fr);
     $('h2h').innerHTML = `<b>YOU</b> ${ratio.toFixed(1)}× off · <b>SAMPLE FRIEND</b> ${fx}× off<br>` +
       (o.who === 'tie' ? 'Dead heat. Nothing drops in the jar.' : o.who === 'you' ? `Friend was closer. <a href="#jar">$0.10 goes on your side of the jar ↓</a>` : `You were closer. <a href="#jar">$0.10 goes on your friend's side ↓</a>`);
     bell(t);
+  }
+  function flyDot(target) {
+    const kr = kn.getBoundingClientRect(), cr = target.c.getBoundingClientRect(), sx = scrollX, sy = scrollY;
+    const x0 = kr.left + kr.width / 2 + sx, y0 = kr.top + kr.height / 2 + sy, x1 = cr.left + cr.width * .5 + sx, y1 = cr.top + cr.height * (NT / 250) + sy;
+    const dx = x1 - x0, dy = y1 - y0, el = document.createElement('div'); el.id = 'fly'; document.body.appendChild(el);
+    const ks = []; for (let k = 0; k <= 24; k++) { const s = k / 24, ex = s * s * (3 - 2 * s); ks.push({ offset: s, transform: `translate(${x0 + dx * ex}px, ${y0 + dy * s * s - 110 * Math.sin(Math.PI * s) * (1 - s)}px) scale(${1 - .72 * s})` }); }
+    const a = el.animate(ks, { duration: 1050, easing: 'linear', fill: 'forwards' });
+    a.onfinish = () => { el.remove(); target.drop(); };
+  }
+  function focusJars() {
+    const r = $('jars').getBoundingClientRect(), vh = innerHeight;
+    if (r.top < 0 || r.bottom > vh) scrollTo({ top: scrollY + r.top - Math.max(16, (vh - r.height) / 2), behavior: REDUCED ? 'auto' : 'smooth' });
+  }
+  $('lock').onclick = () => {
+    locked = true; stage.classList.add('done');
+    const Q = QS[qi], vb = valOf(t) / f, you = off(vb, Q.a);
+    const fg = Q.med * Math.pow(10, Q.sd * randn()), fe = off(fg, Q.a), tie = Math.abs(you - fe) < .01;
+    lastOutcome = { fr: Math.pow(10, fe), who: tie ? 'tie' : you > fe ? 'you' : 'friend' };
+    paintResult(true);
+    haptic(14);
+    if (!REDUCED) {
+      kn.animate([{ transform: 'scale(1)' }, { transform: 'scale(.8)' }, { transform: 'scale(1.22)' }, { transform: 'scale(1)' }], { duration: 400 });
+      const b = document.createElement('i'); b.className = 'burst'; kn.appendChild(b); setTimeout(() => b.remove(), 650);
+      ans.animate([{ opacity: 0, transform: 'translateY(-46px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 500, easing: 'cubic-bezier(.2,1.5,.4,1)', fill: 'forwards' });
+    } else ans.style.opacity = 1;
+    ans.style.opacity = 1;
+    if (lastOutcome.who === 'tie') return;
+    const j = lastOutcome.who === 'you' ? jy : jf;
+    clearTimeout(flyTimer);
+    flyTimer = setTimeout(() => {
+      focusJars();
+      j.onLand = jar => { jar.onLand = null; tally($(jar === jy ? 'ty' : 'tf')); jar.fig.classList.remove('jolt'); void jar.fig.offsetWidth; jar.fig.classList.add('jolt'); haptic([10, 40, 22]); };
+      if (REDUCED) { j.drop(); } else flyDot(j);
+    }, REDUCED ? 0 : 600);
   };
-  $('again').onclick = () => { lastOutcome = null; load((qi + 1) % QS.length); };
+  $('again').onclick = () => { lastOutcome = null; ans.getAnimations().forEach(a => a.cancel()); load((qi + 1) % QS.length); };
   addEventListener('resize', () => { render(); if (locked) place(); });
   load(0); document.fonts && document.fonts.ready.then(render);
 </script>
