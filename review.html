@@ -33,6 +33,17 @@
   .row strong { color: var(--fg); }
   .row a { color: var(--fg); word-break: break-word; }
   .warn { font-size: 13px; color: var(--accent); margin: 0; }
+  .meta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .wow { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .editor { display: flex; flex-direction: column; gap: 8px; }
+  .editor label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  textarea {
+    font: inherit; font-size: 15px; color: var(--fg); background: #111; border: 1.5px solid var(--line2);
+    border-radius: 12px; padding: 10px 12px; resize: vertical; min-height: 64px; width: 100%;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); }
+  .editor-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  button.link { border: none; background: none; padding: 8px 0; min-height: 0; color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 600; text-align: left; justify-self: start; }
   .actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 4px; }
   button {
     font: inherit; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
@@ -61,7 +72,7 @@
     </div>
     <p class="summary" id="summary"></p>
   </header>
-  <p class="summary">Approve plays it today if its category is free, otherwise it goes to the archive. Archive keeps it for Plus without playing it today. Undecided questions are deleted after 7 days.</p>
+  <p class="summary">Most shareable first (🔥 = share appeal). Edit to reword a question before approving. Approve plays it today if its category is free, otherwise it goes to the archive. Archive keeps it for Plus without playing it today. Undecided questions are deleted after 7 days.</p>
   <div id="list" aria-live="polite"></div>
   <p class="empty" id="loading">Loading…</p>
   <p class="error" id="error" hidden></p>
@@ -104,8 +115,13 @@
 
   function render(c) {
     const card = el("article", { class: "card", id: "q-" + c.id });
-    card.append(el("p", { class: "label" }, c.category));
-    card.append(el("p", { class: "q" }, c.question));
+    const meta = el("div", { class: "meta" });
+    meta.append(el("p", { class: "label" }, c.category));
+    const wow = Math.min(5, Math.max(1, Math.round(Number(c.wow_score) || 0)));
+    if (c.wow_score) meta.append(el("span", { class: "wow", title: "Share appeal" }, "🔥".repeat(wow) + ` ${wow}/5`));
+    card.append(meta);
+    const qText = el("p", { class: "q" }, c.question);
+    card.append(qText);
     if (c.needs_manual_check) {
       card.append(el("p", { class: "warn" },
         `⚠️ Check the source yourself: ${c.source_name} blocks automated reading, so this number wasn't verified.`));
@@ -113,7 +129,9 @@
     const answer = el("p", { class: "row" }, "Answer: ");
     answer.append(el("strong", {}, `${Number(c.answer).toLocaleString("en-US")} ${c.unit}`));
     card.append(answer);
-    if (c.fun_fact) card.append(el("p", { class: "row" }, "Fun fact: " + c.fun_fact));
+    const factText = el("p", { class: "row" }, c.fun_fact ? "Fun fact: " + c.fun_fact : "");
+    factText.hidden = !c.fun_fact;
+    card.append(factText);
     const source = el("p", { class: "row" }, (c.source_name || "Source") + " · ");
     if (/^https?:\/\//.test(c.source_url || "")) {
       source.append(el("a", { href: c.source_url, target: "_blank", rel: "noopener noreferrer" }, "Read the article ↗"));
@@ -127,7 +145,45 @@
       b.addEventListener("click", () => act(c, action, card));
       actions.append(b);
     }
-    card.append(status, actions);
+    // Inline editor for rewording before approval.
+    const editBtn = el("button", { type: "button", class: "link edit-toggle" }, "✎ Edit wording");
+    const editor = el("div", { class: "editor" });
+    editor.hidden = true;
+    const qLabel = el("label", { for: "eq-" + c.id }, "Question");
+    const qInput = el("textarea", { id: "eq-" + c.id, rows: "3" });
+    const fLabel = el("label", { for: "ef-" + c.id }, "Fun fact");
+    const fInput = el("textarea", { id: "ef-" + c.id, rows: "2" });
+    const editActions = el("div", { class: "editor-actions" });
+    const saveBtn = el("button", { type: "button", class: "approve" }, "Save wording");
+    const cancelBtn = el("button", { type: "button" }, "Cancel");
+    editActions.append(saveBtn, cancelBtn);
+    editor.append(qLabel, qInput, fLabel, fInput, editActions);
+    editBtn.addEventListener("click", () => {
+      qInput.value = c.question;
+      fInput.value = c.fun_fact || "";
+      editor.hidden = false;
+      editBtn.hidden = true;
+      qInput.focus();
+    });
+    cancelBtn.addEventListener("click", () => {
+      editor.hidden = true;
+      editBtn.hidden = false;
+    });
+    saveBtn.addEventListener("click", async () => {
+      const result = await send(c, card, { action: "edit", question: qInput.value, fun_fact: fInput.value });
+      if (result) {
+        c.question = result.question;
+        if (result.fun_fact !== undefined) c.fun_fact = result.fun_fact;
+        qText.textContent = c.question;
+        factText.textContent = c.fun_fact ? "Fun fact: " + c.fun_fact : "";
+        factText.hidden = !c.fun_fact;
+        editor.hidden = true;
+        editBtn.hidden = false;
+        paint(c, card, "✓ Wording saved");
+      }
+    });
+
+    card.append(editBtn, editor, status, actions);
     paint(c, card);
     return card;
   }
@@ -143,30 +199,42 @@
     // nothing else changes once it's live, played or rejected.
     const final = ["live", "played", "rejected"].includes(c.state);
     actions.hidden = final;
+    // Wording can change until a question has been played (or rejected).
+    card.querySelector(".edit-toggle").hidden = ["played", "rejected"].includes(c.state);
     actions.querySelector(".save").hidden = c.state === "archived";
   }
 
-  async function act(c, action, card) {
-    if (action === "reject" && !confirm("Reject and delete this question?")) return;
+  /** Calls the API for one card. Returns the response body on success, null on failure. */
+  async function send(c, card, payload) {
     const buttons = card.querySelectorAll("button");
     buttons.forEach((b) => (b.disabled = true));
     try {
       const res = await fetch(API, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...auth, id: c.id, action }),
+        body: JSON.stringify({ ...auth, id: c.id, ...payload }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) {
         paint(c, card, body.message || body.error || `Something went wrong (${res.status}).`, false);
-      } else {
-        c.state = body.state || c.state;
-        paint(c, card, "✓ " + body.message.replace(/\.$/, ""));
+        return null;
       }
+      return body;
     } catch {
       paint(c, card, "No connection. Try again.", false);
+      return null;
     } finally {
       buttons.forEach((b) => (b.disabled = false));
+      updateSummary();
+    }
+  }
+
+  async function act(c, action, card) {
+    if (action === "reject" && !confirm("Reject and delete this question?")) return;
+    const body = await send(c, card, { action });
+    if (body) {
+      c.state = body.state || c.state;
+      paint(c, card, "✓ " + body.message.replace(/\.$/, ""));
       updateSummary();
     }
   }
