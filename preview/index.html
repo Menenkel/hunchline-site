@@ -4,105 +4,144 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hunchline — guess the news</title>
-<meta name="description" content="Guess one number from today's news, see how sharp your hunch was, and settle the score with a friend in person.">
+<meta name="description" content="Guess one number from today's news, see how sharp your hunch was, and keep a virtual jar with a friend. The drinks are real, the money isn't.">
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#000; --fg:#fff; --fg2:#e6e6e6; --muted:#7a7a7a; --line:#2a2a2a; --line2:#3a3a3a; --accent:#f2c31b; }
-  * { box-sizing: border-box; }
+  /* Layout: the logo, scaled up. A full-bleed line with one big yellow dot is the demo; a glass jar of the same dots is the explanation. Dark only, like the app. */
+  :root {
+    --bg:#000; --fg:#fff; --fg2:#e6e6e6; --muted:#7a7a7a; --line:#2a2a2a; --line2:#3a3a3a; --accent:#f2c31b;
+    --display:"Bricolage Grotesque","Arial Narrow",Helvetica,Arial,sans-serif;
+    --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --inset:40px;
+    color-scheme:dark;
+  }
+  * { box-sizing:border-box; }
   html, body { margin:0; background:var(--bg); color:var(--fg); }
   body {
-    font: 500 16px/1.45 "Outfit", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing: antialiased; overflow-x: hidden;
-    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+    font:500 16px/1.5 var(--display); font-variation-settings:"wdth" 100;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+    padding:max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
   }
-  /* yellow wash that follows the knob */
   body::before {
     content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
-    background: radial-gradient(600px 400px at var(--kx, 70%) 38%, rgba(242,195,27,.14), transparent 70%);
+    background:radial-gradient(640px 420px at var(--kx,60%) 52%, rgba(242,195,27,.13), transparent 70%);
   }
-  .wrap { position:relative; z-index:1; max-width:1040px; margin:0 auto; min-height:calc(100svh - 40px); display:flex; flex-direction:column; }
+  .wrap { position:relative; z-index:1; max-width:1120px; margin:0 auto; }
+  a { color:inherit; }
 
-  header { display:flex; align-items:center; justify-content:space-between; padding:6px 0 0; }
-  .mark { font-weight:900; font-size:26px; letter-spacing:-.04em; position:relative; padding-top:9px; text-decoration:none; color:var(--fg); }
+  header { display:flex; align-items:center; justify-content:space-between; }
+  .mark { font-weight:800; font-size:27px; letter-spacing:-.04em; position:relative; padding-top:9px; text-decoration:none; }
   .mark::before { content:""; position:absolute; left:0; right:0; top:0; height:3px; border-radius:3px; background:var(--fg); }
   .mark::after { content:""; position:absolute; top:-4px; left:64%; width:11px; height:11px; border-radius:50%; background:var(--accent); }
-  .pill { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; padding:7px 12px; border:1.5px solid var(--line2); border-radius:999px; color:var(--muted); }
+  .tag { font:500 11px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); border:1.5px solid var(--line2); border-radius:999px; padding:6px 12px; }
 
-  main { flex:1; display:flex; flex-direction:column; justify-content:center; gap:34px; padding:34px 0 26px; }
-  .kicker { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); display:flex; gap:10px; align-items:center; }
+  .kicker { font:500 11px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); display:flex; align-items:center; gap:10px; }
   .kicker i { width:28px; height:1.5px; background:var(--accent); }
-  h1 { margin:10px 0 0; font-weight:900; font-size:clamp(44px, 9.2vw, 112px); line-height:.92; letter-spacing:-.045em; text-wrap:balance; }
+
+  /* ---------- hero + demo ---------- */
+  .hero { padding:44px 0 6px; }
+  h1 { margin:14px 0 0; font-weight:800; font-size:clamp(50px, 10.2vw, 118px); line-height:.92; letter-spacing:-.012em; font-variation-settings:"wdth" 84, "opsz" 96; text-wrap:balance; }
   h1 em { font-style:normal; color:var(--accent); }
 
-  /* ---- the demo ---- */
-  .demo { border:1.5px solid var(--line); border-radius:16px; padding:22px 22px 20px; background:rgba(255,255,255,.015); }
-  .q { font-weight:700; font-size:clamp(19px,2.6vw,25px); letter-spacing:-.02em; line-height:1.2; display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
+  .stage { padding-top:38px; }
+  .qrow { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+  .qlabel { font:500 11px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  .q { margin:6px 0 0; font-weight:650; font-size:clamp(20px,2.7vw,28px); line-height:1.15; letter-spacing:-.02em; max-width:30ch; text-wrap:balance; }
   .tog { display:flex; border:1.5px solid var(--line2); border-radius:999px; padding:2px; flex:none; }
   .tog.off { visibility:hidden; }
-  .tog button { font:inherit; font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); background:transparent; border:0; padding:5px 10px; border-radius:999px; cursor:pointer; }
+  .tog button { font:500 10px var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); background:transparent; border:0; padding:6px 11px; border-radius:999px; cursor:pointer; }
   .tog button[aria-pressed="true"] { background:var(--fg); color:#000; }
-  .cap { font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:4px; }
-  .val .conv { font-size:.3em; color:var(--muted); font-weight:700; }
-  .val { font-weight:800; font-size:clamp(48px,8vw,84px); letter-spacing:-.04em; font-variant-numeric:tabular-nums; line-height:1; margin:14px 0 6px; display:flex; align-items:baseline; gap:10px; }
-  .val > span { font-size:.3em; letter-spacing:.02em; color:var(--muted); font-weight:700; }
 
-  .slider { position:relative; height:46px; touch-action:none; cursor:grab; user-select:none; -webkit-user-select:none; margin:0 11px; }
-  .slider:active { cursor:grabbing; }
-  .track { position:absolute; left:-11px; right:-11px; top:21px; height:5px; border-radius:5px; background:var(--fg); }
-  .knob { position:absolute; top:23.5px; width:34px; height:34px; border-radius:50%; background:var(--accent); transform:translate(-50%,-50%); box-shadow:0 0 0 0 rgba(242,195,27,.5), 0 0 28px rgba(242,195,27,.55); transition:transform .15s; }
-  .slider:active .knob { transform:translate(-50%,-50%) scale(1.15); }
-  .slider:focus-visible { outline:2px solid var(--accent); outline-offset:6px; border-radius:8px; }
-  .pulse .knob { animation:pulse 1.8s ease-out infinite; }
-  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(242,195,27,.55),0 0 28px rgba(242,195,27,.55)} 70%,100%{box-shadow:0 0 0 20px rgba(242,195,27,0),0 0 28px rgba(242,195,27,.55)} }
-  .ans { position:absolute; top:23.5px; width:0; height:0; opacity:0; transition:opacity .4s .25s; }
-  .ans::before { content:""; position:absolute; left:-2px; top:-22px; width:4px; height:44px; background:var(--fg); border-radius:2px; }
-  .ans b { position:absolute; top:-46px; left:0; transform:translateX(-50%); font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; background:var(--fg); color:#000; padding:3px 8px; border-radius:999px; }
-  .ticks { position:relative; height:14px; margin:0 11px; font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .val { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:18px 0 10px; line-height:.95; }
+  .val output { font-weight:800; font-size:clamp(64px,11vw,132px); letter-spacing:-.02em; font-variant-numeric:tabular-nums; font-variation-settings:"wdth" 92, "opsz" 96; }
+  .val .u { font:500 clamp(14px,1.6vw,18px) var(--mono); color:var(--muted); letter-spacing:.02em; }
 
-  .ticks span { position:absolute; transform:translateX(-50%); } .ticks span:first-child { transform:none; } .ticks span:last-child { transform:translateX(-100%); }
-  .reveal { display:grid; grid-template-rows:0fr; transition:grid-template-rows .5s cubic-bezier(.2,.8,.2,1); }
-  .reveal > div { overflow:hidden; }
-  .done .reveal { grid-template-rows:1fr; }
-  .verdict { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; padding-top:20px; flex-wrap:wrap; }
-  .verdict .big { font-weight:900; font-size:clamp(34px,5vw,54px); letter-spacing:-.04em; line-height:1; }
-  .verdict .big em { font-style:normal; color:var(--accent); }
-  .verdict p { margin:6px 0 0; color:var(--fg2); font-size:14px; } .verdict p a { color:var(--muted); text-decoration:underline; text-underline-offset:3px; white-space:nowrap; } .verdict p a:hover { color:var(--accent); }
-  svg.bell { width:min(340px,100%); height:auto; display:block; }
+  /* full-bleed line */
+  .bleed { width:100vw; margin-left:calc(50% - 50vw); }
+  .lane { position:relative; height:84px; touch-action:none; cursor:grab; user-select:none; -webkit-user-select:none; }
+  .lane:active { cursor:grabbing; }
+  .lane:focus-visible { outline:2px solid var(--accent); outline-offset:-6px; }
+  .line { position:absolute; left:0; right:0; top:40px; height:4px; background:var(--fg); }
+  .rail { position:absolute; left:var(--inset); right:var(--inset); top:0; bottom:0; }
+  .knob { position:absolute; top:42px; width:56px; height:56px; margin:-28px 0 0 -28px; border-radius:50%; background:var(--accent); display:grid; place-items:center; box-shadow:0 0 44px rgba(242,195,27,.5); transition:transform .15s; }
+  .knob svg { width:26px; height:26px; stroke:#000; stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .lane:active .knob { transform:scale(1.12); }
+  .pulse .knob::after { content:""; position:absolute; inset:0; border-radius:50%; border:2px solid var(--accent); animation:ring 1.8s ease-out infinite; }
+  @keyframes ring { from { transform:scale(1); opacity:.9; } to { transform:scale(1.9); opacity:0; } }
+  .ans { position:absolute; top:42px; width:0; height:0; opacity:0; transition:opacity .4s .25s; }
+  .ans::before { content:""; position:absolute; left:-2px; top:-26px; width:4px; height:52px; background:var(--fg); border-radius:2px; }
+  .ans b { position:absolute; bottom:34px; left:0; transform:translateX(-50%); font:500 10px var(--mono); letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; background:var(--fg); color:#000; padding:4px 9px; border-radius:999px; }
+  .ticks { position:relative; height:16px; margin:0 var(--inset); font:400 10px var(--mono); color:var(--muted); letter-spacing:.04em; }
+  .ticks span { position:absolute; transform:translateX(-50%); }
+  .ticks span:first-child { transform:none; } .ticks span:last-child { transform:translateX(-100%); }
 
-  .row { display:flex; align-items:center; gap:14px; margin-top:18px; flex-wrap:wrap; }
-  .btn { font:inherit; font-weight:800; font-size:14px; letter-spacing:.1em; text-transform:uppercase; border:0; cursor:pointer; background:var(--fg); color:#000; height:54px; padding:0 26px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:10px; text-decoration:none; transition:transform .15s, opacity .15s; }
+  .row { display:flex; align-items:center; gap:14px; margin-top:22px; flex-wrap:wrap; }
+  .btn { font:700 14px var(--display); font-variation-settings:"wdth" 100, "opsz" 14; letter-spacing:.1em; text-transform:uppercase; border:0; cursor:pointer; background:var(--fg); color:#000; height:54px; padding:0 28px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:10px; text-decoration:none; transition:transform .15s, opacity .15s, box-shadow .2s; }
   .btn:hover { transform:translateY(-2px); } .btn:active { opacity:.7; transform:none; }
   .btn.ghost { background:transparent; color:var(--fg); border:1.5px solid var(--line2); }
-  .hint { font-size:12px; color:var(--muted); font-weight:600; }
-  .demo:not(.done) .again, .done .lock { display:none; }
+  .hint { font:400 12px var(--mono); color:var(--muted); }
+  .stage:not(.done) .again, .done .lock { display:none; }
 
-  /* ---- steps + download ---- */
-  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-  .step { border-top:1.5px solid var(--line); padding-top:12px; }
-  .step b { display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:800; color:var(--accent); margin-bottom:4px; }
-  .step span { font-size:14px; color:var(--fg2); font-weight:500; line-height:1.35; display:block; }
+  .reveal { display:grid; grid-template-rows:0fr; transition:grid-template-rows .5s cubic-bezier(.2,.8,.2,1); }
+  .reveal > div { overflow:hidden; min-height:0; }
+  .done .reveal { grid-template-rows:1fr; }
+  .result { display:grid; grid-template-columns:1fr minmax(0,340px); gap:20px 40px; align-items:end; padding-top:30px; }
+  .verdict { font-weight:800; font-size:clamp(40px,6vw,72px); line-height:.95; letter-spacing:-.02em; font-variation-settings:"wdth" 86, "opsz" 96; }
+  .verdict em { font-style:normal; color:var(--accent); }
+  .sub { margin:10px 0 0; color:var(--fg2); font-size:15px; }
+  .sub a { color:var(--muted); text-underline-offset:3px; white-space:nowrap; } .sub a:hover { color:var(--accent); }
+  .h2h { margin:14px 0 0; font:400 12px/1.7 var(--mono); color:var(--muted); letter-spacing:.02em; }
+  .h2h b { color:var(--fg); font-weight:500; }
+  .h2h a { color:var(--accent); text-underline-offset:3px; }
+  svg.bell { width:100%; height:auto; display:block; }
+  .cap { font:500 10px var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:6px; }
 
-  .dl { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; border-top:1.5px solid var(--line); padding-top:22px; }
-  .dl .app { display:flex; align-items:center; gap:14px; }
-  .dl img { width:56px; height:56px; border-radius:13px; border:1.5px solid var(--line2); }
-  .dl strong { display:block; font-weight:800; font-size:18px; letter-spacing:-.02em; }
-  .dl small { color:var(--muted); font-size:12px; font-weight:600; }
-  .btn.big { height:62px; padding:0 34px; font-size:15px; box-shadow:0 0 0 0 rgba(242,195,27,0); }
+  /* ---------- the jar ---------- */
+  .jar { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,520px); gap:40px 64px; align-items:center; margin-top:84px; padding-top:44px; border-top:1.5px solid var(--line); }
+  h2 { margin:14px 0 0; font-weight:800; font-size:clamp(40px,6vw,78px); line-height:.94; letter-spacing:-.012em; font-variation-settings:"wdth" 84, "opsz" 96; text-wrap:balance; }
+  h2 em { font-style:normal; color:var(--accent); }
+  .jar p.lead { margin:20px 0 0; max-width:44ch; color:var(--fg2); font-size:17px; line-height:1.45; }
+  .ledger { margin:26px 0 0; max-width:480px; }
+  .ledger div { display:flex; align-items:baseline; gap:8px; font:400 12px var(--mono); letter-spacing:.06em; text-transform:uppercase; padding:7px 0; }
+  .ledger dt { color:var(--muted); white-space:nowrap; }
+  .ledger div::before { content:""; order:1; flex:1; min-width:12px; border-bottom:1.5px dotted var(--line2); transform:translateY(-3px); }
+  .ledger dd { order:2; margin:0; color:var(--fg); text-align:right; }
+  .ledger .zero dd { color:var(--accent); font-weight:500; }
+
+  .jar-art { position:relative; }
+  .jars { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  figure { margin:0; text-align:center; }
+  canvas { width:100%; max-width:240px; height:auto; display:block; margin:0 auto; }
+  figcaption { font:500 11px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:2px; margin-top:2px; }
+  figcaption b { font:800 clamp(34px,5vw,52px)/1 var(--display); letter-spacing:-.01em; color:var(--fg); font-variant-numeric:tabular-nums; font-variation-settings:"wdth" 92, "opsz" 96; transition:transform .25s cubic-bezier(.3,1.6,.5,1), color .25s; }
+  figcaption b.bump { transform:scale(1.18); color:var(--accent); }
+  .stamp { position:absolute; left:50%; top:26%; transform:translate(-50%,-50%) rotate(-8deg); z-index:2; font:500 11px/1.25 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); border:1.5px solid var(--accent); border-radius:6px; padding:7px 10px; background:rgba(0,0,0,.82); text-align:center; white-space:nowrap; pointer-events:none; }
+  .net { margin:20px 0 0; text-align:center; font:500 14px var(--mono); letter-spacing:.04em; color:var(--fg); }
+  .eg { margin:6px 0 0; text-align:center; font:400 11px var(--mono); letter-spacing:.04em; color:var(--muted); }
+
+  /* ---------- download ---------- */
+  .dl { margin-top:84px; padding-top:26px; border-top:1.5px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .app { display:flex; align-items:center; gap:14px; }
+  .app img { width:60px; height:60px; border-radius:14px; border:1.5px solid var(--line2); }
+  .app strong { display:block; font-weight:800; font-size:20px; letter-spacing:-.02em; }
+  .app small { color:var(--muted); font:400 12px var(--mono); }
+  .btn.big { height:64px; padding:0 36px; font-size:15px; }
   .btn.big:hover { box-shadow:0 8px 40px rgba(242,195,27,.35); }
   .btn svg { width:20px; height:20px; fill:currentColor; margin-top:-2px; }
+  footer { display:flex; justify-content:space-between; font:400 11px var(--mono); color:var(--muted); padding:26px 0 6px; }
 
-  footer { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); padding-top:18px; font-weight:600; }
-  footer a { color:inherit; }
-
-  @media (max-width:640px) {
-    .steps { grid-template-columns:1fr; gap:10px; } .step { display:flex; gap:12px; align-items:baseline; } .step b { min-width:78px; margin:0; white-space:nowrap; }
-    .demo { padding:18px 16px; } .dl .btn { width:100%; padding:0 16px; letter-spacing:.06em; }
+  @media (max-width:820px) {
+    :root { --inset:30px; }
+    .result, .jar { grid-template-columns:1fr; }
+    .jar { gap:36px; margin-top:64px; }
+    .dl { margin-top:64px; } .dl .btn { width:100%; padding:0 16px; letter-spacing:.06em; }
+    .stamp { top:22%; }
   }
   @media (prefers-reduced-motion:reduce) { *{animation:none!important; transition:none!important;} }
 </style>
@@ -111,57 +150,91 @@
 <div class="wrap">
   <header>
     <a class="mark" href="/">hunchline</a>
-    <span class="pill">Free · iPhone</span>
+    <span class="tag">Free · iPhone</span>
   </header>
 
-  <main>
-    <div>
-      <div class="kicker"><i></i>One number from today's news</div>
-      <h1>Guess the news.<br><em>Settle it in person.</em></h1>
+  <section class="hero">
+    <div class="kicker"><i></i>One number from today's news</div>
+    <h1>Guess the news.<br><em>Settle it in person.</em></h1>
+  </section>
+
+  <section class="stage pulse" id="stage" aria-label="Try it">
+    <div class="qrow">
+      <div>
+        <div class="qlabel">From the news · try it</div>
+        <p class="q" id="qtext"></p>
+      </div>
+      <div class="tog off" id="tog" role="group" aria-label="Units"><button data-s="imp" aria-pressed="false">US</button><button data-s="met" aria-pressed="true">Metric</button></div>
     </div>
 
-    <section class="demo pulse" id="demo" aria-label="Try it">
-      <div class="q"><span id="qtext"></span><div class="tog off" id="tog" role="group" aria-label="Units"><button data-s="imp" aria-pressed="false">US</button><button data-s="met" aria-pressed="true">Metric</button></div></div>
-      <div class="val"><output id="out"></output><span id="unit"></span><span class="conv" id="conv"></span></div>
-      <div class="slider" id="sl" role="slider" tabindex="0" aria-label="Your guess" aria-valuemin="1" aria-valuenow="1">
-        <div class="track"></div>
-        <div class="ans" id="ans"><b id="ansl"></b></div>
-        <div class="knob" id="kn"></div>
+    <div class="val"><output id="out"></output><span class="u" id="unit"></span><span class="u" id="conv"></span></div>
+
+    <div class="bleed">
+      <div class="lane" id="sl" role="slider" tabindex="0" aria-label="Your guess" aria-valuemin="1" aria-valuenow="1">
+        <div class="line"></div>
+        <div class="rail" id="rail">
+          <div class="ans" id="ans"><b id="ansl"></b></div>
+          <div class="knob" id="kn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg></div>
+        </div>
       </div>
       <div class="ticks" id="ticks"></div>
+    </div>
 
-      <div class="reveal"><div>
-        <div class="verdict">
-          <div><div class="big" id="verdict">—</div><p id="sub"></p></div>
-          <div><svg class="bell" viewBox="0 0 340 90" aria-hidden="true">
+    <div class="row">
+      <button class="btn lock" id="lock">Lock in</button>
+      <button class="btn ghost again" id="again">Next question</button>
+      <span class="hint lock">Drag the dot. Same slider as the app. New questions daily.</span>
+    </div>
+
+    <div class="reveal"><div>
+      <div class="result">
+        <div>
+          <div class="verdict" id="verdict">—</div>
+          <p class="sub" id="sub"></p>
+          <p class="h2h" id="h2h"></p>
+        </div>
+        <div>
+          <svg class="bell" viewBox="0 0 340 90" aria-hidden="true">
             <path id="curve" d="" fill="rgba(255,255,255,.08)" stroke="#fff" stroke-width="2"/>
             <line id="alin" y1="16" y2="78" stroke="#fff" stroke-width="2" stroke-dasharray="3 3"/>
-            <text id="alab" y="10" fill="#fff" font-size="8.5" font-weight="800" letter-spacing="1.2" text-anchor="middle">ANSWER</text>
+            <text id="alab" y="10" fill="#fff" font-size="8.5" font-weight="500" letter-spacing="1.2" text-anchor="middle" font-family="DM Mono, monospace">ANSWER</text>
             <line id="you" y1="6" y2="78" stroke="#f2c31b" stroke-width="3" stroke-linecap="round"/>
             <circle id="youd" r="6" fill="#f2c31b"/>
             <line x1="0" x2="340" y1="78" y2="78" stroke="#fff" stroke-width="2"/>
-          </svg><div class="cap" id="cap"></div></div>
+          </svg>
+          <div class="cap" id="cap"></div>
         </div>
-      </div></div>
-
-      <div class="row">
-        <button class="btn lock" id="lock">Lock in</button>
-        <button class="btn ghost again" id="again">Next question</button>
-        <span class="hint lock">Drag the dot. Same slider as the app. New questions every day.</span>
       </div>
-    </section>
+    </div></div>
+  </section>
 
-    <div class="steps">
-      <div class="step"><b>1 · Guess</b><span>A real number from today's headlines. Make your best call on a slider.</span></div>
-      <div class="step"><b>2 · Reveal</b><span>See the answer and how sharp your hunch was against everyone.</span></div>
-      <div class="step"><b>3 · Jar</b><span>Whoever's further off all month buys the next round. In real life.</span></div>
+  <section class="jar" id="jar">
+    <div>
+      <div class="kicker"><i></i>The jar</div>
+      <h2>The jar is pretend.<br><em>The drinks are real.</em></h2>
+      <p class="lead">Play against one friend. Each time you're further off than they are, $0.10 drops on your side of the jar. It's a running tally between the two of you and nothing more. No payments, no cards, no cash in the app.</p>
+      <dl class="ledger">
+        <div><dt>Each miss</dt><dd>$0.10 on your side</dd></div>
+        <div><dt>Last day of the month</dt><dd>Whoever's behind buys</dd></div>
+        <div><dt>The bill</dt><dd>Drinks or movie tickets</dd></div>
+        <div class="zero"><dt>Money moved in the app</dt><dd>$0.00</dd></div>
+      </dl>
     </div>
+    <div class="jar-art">
+      <div class="stamp">Virtual<br>no real money</div>
+      <div class="jars">
+        <figure><canvas id="jy" aria-label="Your jar"></canvas><figcaption>You <b id="ty">$1.60</b></figcaption></figure>
+        <figure><canvas id="jf" aria-label="Your friend's jar"></canvas><figcaption>Friend <b id="tf">$1.60</b></figcaption></figure>
+      </div>
+      <p class="net" id="net">All square. Make your guess.</p>
+      <p class="eg">Example month so far. Your guesses above drop into it. The jar resets on the 1st.</p>
+    </div>
+  </section>
 
-    <div class="dl">
-      <div class="app"><img src="icon.png" alt="Hunchline app icon"><div><strong>Hunchline</strong><small>Two minutes a day. Then put the phone down.</small></div></div>
-      <a class="btn big" id="store" href="#"><svg viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg><span id="storeTxt">Download</span></a>
-    </div>
-  </main>
+  <section class="dl">
+    <div class="app"><img src="icon.png" alt="Hunchline app icon"><div><strong>Hunchline</strong><small>Two minutes a day. Then put the phone down.</small></div></div>
+    <a class="btn big" id="store" href="#"><svg viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg><span id="storeTxt">Download</span></a>
+  </section>
 
   <footer><span>© Hunchline</span><span>hunchline.online</span></footer>
 </div>
@@ -173,9 +246,12 @@
   if (APP_STORE_URL) store.href = APP_STORE_URL;
   else { document.getElementById('storeTxt').textContent = 'Coming soon · App Store'; store.style.pointerEvents = 'none'; }
 
-  // Real questions from the Hunchline question bank. `a` is in the source's own unit (base).
-  // imp/met = how the slider reads in each system: unit, factor from base, lo/hi = slider range as powers of ten.
-  // med/sd = MODELLED typical guess (median, spread in log10 units). An estimate, not measured crowd data.
+  const $ = id => document.getElementById(id);
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ============ questions (real, from the Hunchline question bank) ============
+     a = answer in the source's unit. imp/met = slider per unit system (f = factor from base, lo/hi = powers of ten).
+     med/sd = MODELLED typical guess (median, spread in log10). An estimate, not measured crowd data. */
   const same = (unit, lo, hi) => ({ unit, f: 1, lo, hi });
   const QS = [
     { q: "How long was SpaceX's Starship when the launch tower's arms caught it?", a: 170, med: 250, sd: .30, src: 'NYT', url: 'https://www.nytimes.com/2026/11/14/science/spacex-starship-first-catch.html',
@@ -190,66 +266,61 @@
       imp: same('applicants', 1, 5), met: same('applicants', 1, 5) }
   ];
 
-  const $ = id => document.getElementById(id);
-  const demo = $('demo'), sl = $('sl'), kn = $('kn'), out = $('out'), ans = $('ans');
-  let qi = 0, lo = 1, hi = 4, f = 1, U = {}, t = .5, locked = false;
-
-  // default unit system by locale; remembered for the visit
+  const stage = $('stage'), sl = $('sl'), rail = $('rail'), kn = $('kn'), out = $('out'), ans = $('ans');
+  let qi = 0, lo = 1, hi = 4, f = 1, t = .5, locked = false;
   let sys = /^(en-US|en-LR|my)/i.test(navigator.language || '') ? 'imp' : 'met';
   try { sys = sessionStorage.getItem('hl-sys') || sys; } catch (e) {}
 
   const sig3 = v => { const m = Math.pow(10, Math.floor(Math.log10(v)) - 2); return Math.round(v / m) * m; };
   const fmt = v => v < 10 ? v.toFixed(1).replace('.0', '') : Math.round(v).toLocaleString('en-US');
   const fmtC = v => v < 10 ? v.toFixed(1).replace('.0', '') : v < 100 ? Math.round(v).toLocaleString('en-US') : sig3(v).toLocaleString('en-US');
-  const both = (base, withApprox) => {            // "170 ft (52 m)"  /  "31,000 mi (49,900 km)"
+  const both = base => {
     const Q = QS[qi], i = Q.imp, m = Q.met;
     if (i.unit === m.unit) return `${fmt(base)} ${i.unit}`;
     const [x, y] = sys === 'imp' ? [i, m] : [m, i];
     return `${fmtC(base * x.f)} ${x.unit} (${fmtC(base * y.f)} ${y.unit})`;
   };
-  const valOf = t => Math.pow(10, lo + t * (hi - lo));            // slider value in the active unit
+  const short = v => v >= 1e6 ? (v / 1e6) + 'M' : v >= 1e3 ? (v / 1e3) + 'K' : String(v);
+  const valOf = t => Math.pow(10, lo + t * (hi - lo));
   const tOf = v => (Math.log10(v) - lo) / (hi - lo);
-  const place = () => { ans.style.left = (tOf(QS[qi].a * f) * sl.clientWidth) + 'px'; };
+  const place = () => { ans.style.left = (tOf(QS[qi].a * f) * rail.clientWidth) + 'px'; };
 
   function load(i) {
-    const Q = QS[i]; qi = i; U = Q[sys]; f = U.f; lo = U.lo; hi = U.hi; locked = false; t = .5;
-    demo.classList.remove('done'); ans.style.opacity = 0;
-    $('qtext').textContent = Q.q; $('unit').textContent = U.unit;
-    $('ansl').textContent = both(Q.a);
+    const Q = QS[i], U = Q[sys]; qi = i; f = U.f; lo = U.lo; hi = U.hi; locked = false; t = .5;
+    stage.classList.remove('done'); ans.style.opacity = 0;
+    $('qtext').textContent = Q.q; $('unit').textContent = U.unit; $('ansl').textContent = both(Q.a);
     $('tog').classList.toggle('off', Q.imp.unit === Q.met.unit);
     document.querySelectorAll('#tog button').forEach(b => b.setAttribute('aria-pressed', b.dataset.s === sys));
     const n = hi - lo; let h = '';
-    for (let k = 0; k <= n; k++) h += `<span style="left:${(k / n * 100)}%">${Math.pow(10, lo + k).toLocaleString('en-US')}</span>`;
+    for (let k = 0; k <= n; k++) h += `<span style="left:${(k / n * 100)}%">${short(Math.pow(10, lo + k))}</span>`;
     $('ticks').innerHTML = h;
     sl.setAttribute('aria-valuemin', Math.pow(10, lo)); sl.setAttribute('aria-valuemax', Math.pow(10, hi));
     render();
   }
   function render() {
-    const w = sl.clientWidth, v = valOf(t), Q = QS[qi];
+    const w = rail.clientWidth, v = valOf(t), Q = QS[qi];
     kn.style.left = (t * w) + 'px';
     out.textContent = fmt(v);
-    $('conv').textContent = Q.imp.unit === Q.met.unit ? '' : ' ≈ ' + fmtC(v / f * (sys === 'imp' ? Q.met.f : Q.imp.f)) + ' ' + (sys === 'imp' ? Q.met.unit : Q.imp.unit);
+    $('conv').textContent = Q.imp.unit === Q.met.unit ? '' : '≈ ' + fmtC(v / f * (sys === 'imp' ? Q.met.f : Q.imp.f)) + ' ' + (sys === 'imp' ? Q.met.unit : Q.imp.unit);
     sl.setAttribute('aria-valuenow', Math.round(v));
-    document.body.style.setProperty('--kx', (sl.getBoundingClientRect().left + 11 + t * w) + 'px');
+    document.body.style.setProperty('--kx', (rail.getBoundingClientRect().left + t * w) + 'px');
   }
-  function setFromX(x) { const r = sl.getBoundingClientRect(); t = Math.min(1, Math.max(0, (x - r.left) / r.width)); render(); }
-  sl.addEventListener('pointerdown', e => { if (locked) return; demo.classList.remove('pulse'); sl.setPointerCapture(e.pointerId); setFromX(e.clientX); sl.onpointermove = ev => setFromX(ev.clientX); });
+  function setFromX(x) { const r = rail.getBoundingClientRect(); t = Math.min(1, Math.max(0, (x - r.left) / r.width)); render(); }
+  sl.addEventListener('pointerdown', e => { if (locked) return; stage.classList.remove('pulse'); sl.setPointerCapture(e.pointerId); setFromX(e.clientX); sl.onpointermove = ev => setFromX(ev.clientX); });
   sl.addEventListener('pointerup', () => { sl.onpointermove = null; });
-  sl.addEventListener('keydown', e => { if (locked) return; const st = e.shiftKey ? .05 : .01; if (e.key === 'ArrowRight' || e.key === 'ArrowUp') t = Math.min(1, t + st); else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') t = Math.max(0, t - st); else return; e.preventDefault(); demo.classList.remove('pulse'); render(); });
+  sl.addEventListener('keydown', e => { if (locked) return; const st = e.shiftKey ? .05 : .01; if (e.key === 'ArrowRight' || e.key === 'ArrowUp') t = Math.min(1, t + st); else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') t = Math.max(0, t - st); else return; e.preventDefault(); stage.classList.remove('pulse'); render(); });
   document.querySelectorAll('#tog button').forEach(b => b.onclick = () => {
     if (b.dataset.s === sys) return;
-    const keep = valOf(t) / f;                           // keep the guess, re-express it on the new scale
+    const keep = valOf(t) / f;
     sys = b.dataset.s; try { sessionStorage.setItem('hl-sys', sys); } catch (e) {}
     const was = locked; load(qi);
-    { t = Math.min(1, Math.max(0, tOf(keep * f))); render(); }
-    if (was) $('lock').onclick();
+    t = Math.min(1, Math.max(0, tOf(keep * f))); render();
+    if (was) reshow();
   });
 
-  // normal CDF (Abramowitz-Stegun) for the percentile estimate
+  /* ---------- crowd curve (modelled) ---------- */
   const erf = x => { const s = Math.sign(x); x = Math.abs(x); const k = 1 / (1 + .3275911 * x); return s * (1 - (((((1.061405429 * k - 1.453152027) * k) + 1.421413741) * k - .284496736) * k + .254829592) * k * Math.exp(-x * x)); };
   const Phi = z => .5 * (1 + erf(z / Math.SQRT2));
-
-  // modelled crowd: log-normal around Q.med
   function bell(tYou) {
     const Q = QS[qi], W = 340, H = 78, mu = tOf(Q.med * f), sg = Q.sd / (hi - lo); let d = '';
     for (let i = 0; i <= 120; i++) { const x = i / 120, y = Math.exp(-((x - mu) ** 2) / (2 * sg * sg)); d += (i ? 'L' : 'M') + (x * W).toFixed(1) + ' ' + (H - y * 58).toFixed(1); }
@@ -261,22 +332,107 @@
     $('alab').setAttribute('x', Math.min(W - 24, Math.max(24, ax)));
     $('cap').textContent = 'Typical guesses (est.) ≈ ' + both(Q.med);
   }
-  // share of the modelled crowd you beat on closeness
   function beats(guessBase) {
     const Q = QS[qi], la = Math.log10(Q.a), m = Math.log10(Q.med), d = Math.abs(Math.log10(guessBase) - la);
     const within = Phi((la + d - m) / Q.sd) - Phi((la - d - m) / Q.sd);
     return Math.min(99, Math.max(1, Math.round((1 - within) * 100)));
   }
+  const randn = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  const off = (g, a) => Math.abs(Math.log10(g / a));            // distance from the answer on the log scale
+  const ratioOf = (g, a) => Math.pow(10, off(g, a));
 
+  /* ---------- the jars: yellow dots with a little physics ---------- */
+  const CX = 100, FLOOR = 230, R = 12, NECK = 30, BODY = 78;
+  const hw = y => y <= 62 ? NECK : y >= 104 ? BODY : NECK + (BODY - NECK) * (s => s * s * (3 - 2 * s))((y - 62) / 42);
+
+  class Jar {
+    constructor(canvas) {
+      this.c = canvas; this.balls = []; this.last = -1; this.id = 0; this.awake = false; this.rest = 0;
+      this.dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = 200 * this.dpr; canvas.height = 250 * this.dpr;
+      this.g = canvas.getContext('2d'); this.g.scale(this.dpr, this.dpr);
+    }
+    add(n, stagger) { for (let i = 0; i < n; i++) { const x = CX + (Math.random() - .5) * 14, y = -14 - i * stagger; this.balls.push({ x, y, px: x, py: y - 3, id: this.id++ }); } this.last = this.id - 1; this.wake(); }
+    wake() { this.rest = 0; if (!this.awake) { this.awake = true; requestAnimationFrame(() => this.loop()); } }
+    get count() { return this.balls.length; }
+    step() {
+      const B = this.balls; let move = 0;
+      for (const b of B) {
+        const vx = (b.x - b.px) * .995, vy = (b.y - b.py) * .995 + .45;
+        b.px = b.x; b.py = b.y; b.x += Math.max(-12, Math.min(12, vx)); b.y += Math.max(-12, Math.min(12, vy));
+      }
+      for (let it = 0; it < 6; it++) {
+        for (let i = 0; i < B.length; i++) for (let j = i + 1; j < B.length; j++) {
+          const a = B[i], b = B[j], dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
+          if (d2 < 4 * R * R && d2 > 1e-6) { const d = Math.sqrt(d2), k = (2 * R - d) / d * .5; a.x -= dx * k; a.y -= dy * k; b.x += dx * k; b.y += dy * k; }
+        }
+        for (const b of B) {
+          const lim = hw(b.y) - R; b.x = Math.max(CX - lim, Math.min(CX + lim, b.x));
+          if (b.y > FLOOR - R) b.y = FLOOR - R;
+          if (b.y > 206) { const sx = b.x < CX ? -1 : 1, dx = Math.abs(b.x - CX) - 52, dy = b.y - 206;
+            if (dx > 0) { const d = Math.hypot(dx, dy), L = 24 - R; if (d > L) { b.x = CX + sx * (52 + dx * L / d); b.y = 206 + dy * L / d; } } }
+        }
+      }
+      for (const b of B) move += Math.abs(b.x - b.px) + Math.abs(b.y - b.py);
+      return move;
+    }
+    loop() {
+      const m = this.step(); this.draw();
+      this.rest = m < .02 * Math.max(1, this.balls.length) ? this.rest + 1 : 0;
+      if (this.rest > 40) { this.awake = false; return; }
+      requestAnimationFrame(() => this.loop());
+    }
+    settle() { for (let i = 0; i < 520; i++) this.step(); this.draw(); }
+    draw() {
+      const g = this.g; g.clearRect(0, 0, 200, 250);
+      g.fillStyle = '#f2c31b';
+      for (const b of this.balls) { g.beginPath(); g.arc(b.x, b.y, R - .5, 0, 7); g.fill(); }
+      const lb = this.balls.find(b => b.id === this.last);
+      if (lb && this.id > 16) { g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(lb.x, lb.y, R + 3, 0, 7); g.stroke(); }
+      g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.lineCap = 'round'; g.lineJoin = 'round';
+      g.beginPath();
+      g.moveTo(CX - 46, 27); g.lineTo(CX - 34, 28); g.lineTo(CX - 34, 62);
+      g.bezierCurveTo(CX - 34, 88, CX - 82, 84, CX - 82, 108); g.lineTo(CX - 82, 206);
+      g.arcTo(CX - 82, 232, CX - 56, 232, 26); g.lineTo(CX + 56, 232); g.arcTo(CX + 82, 232, CX + 82, 206, 26);
+      g.lineTo(CX + 82, 108); g.bezierCurveTo(CX + 82, 84, CX + 34, 88, CX + 34, 62); g.lineTo(CX + 34, 28); g.lineTo(CX + 46, 27);
+      g.stroke();
+      g.strokeStyle = 'rgba(255,255,255,.2)'; g.lineWidth = 3; g.beginPath(); g.moveTo(CX - 70, 130); g.lineTo(CX - 70, 196); g.stroke();
+    }
+  }
+  const jy = new Jar($('jy')), jf = new Jar($('jf'));
+  jy.add(16, 28); jf.add(16, 28); jy.settle(); jf.settle();           // example month so far: $1.60 each
+  const cents = n => '$' + (n * .1).toFixed(2);
+  function tally(bumpEl) {
+    $('ty').textContent = cents(jy.count); $('tf').textContent = cents(jf.count);
+    if (bumpEl) { bumpEl.classList.add('bump'); setTimeout(() => bumpEl.classList.remove('bump'), 350); }
+    const d = jy.count - jf.count, amt = cents(Math.abs(d));
+    $('net').textContent = d === 0 ? 'All square. Make your guess.' : d > 0 ? `You're ${amt} behind. You're buying.` : `Friend's ${amt} behind. They're buying.`;
+  }
+  tally();
+  const MAXB = 56;
+
+  /* ---------- lock in: you vs a sample friend ---------- */
+  let lastOutcome = null;
+  function reshow() { $('lock').onclick(); }
   $('lock').onclick = () => {
-    locked = true; demo.classList.add('done');
-    const Q = QS[qi], v = valOf(t), vb = v / f, ratio = Math.max(vb, Q.a) / Math.min(vb, Q.a);
+    const first = !locked; locked = true; stage.classList.add('done');
+    const Q = QS[qi], v = valOf(t), vb = v / f, ratio = ratioOf(vb, Q.a);
     place(); ans.style.opacity = 1;
     $('verdict').innerHTML = ratio < 1.1 ? 'Dead on. <em>Wow.</em>' : ratio < 2 ? `<em>${ratio.toFixed(1)}×</em> off. Close.` : `<em>${ratio < 10 ? ratio.toFixed(1) : Math.round(ratio)}×</em> off.`;
     $('sub').innerHTML = `You said ${both(vb)}. It's ${both(Q.a)}. <a href="${Q.url}" target="_blank" rel="noopener">${Q.src} ↗</a><br>Closer than ~${beats(vb)}% of typical guesses (est.)`;
+    if (first || !lastOutcome) {
+      const fg = Q.med * Math.pow(10, Q.sd * randn()), fr = ratioOf(fg, Q.a);
+      lastOutcome = { fr, you: off(vb, Q.a), fr10: off(fg, Q.a) };
+      const youMiss = lastOutcome.you > lastOutcome.fr10, tie = Math.abs(lastOutcome.you - lastOutcome.fr10) < .01;
+      lastOutcome.who = tie ? 'tie' : youMiss ? 'you' : 'friend';
+      if (!tie) { const j = youMiss ? jy : jf; if (j.count < MAXB) j.add(1, 0); tally($(youMiss ? 'ty' : 'tf')); }
+    }
+    const o = lastOutcome, fx = o.fr < 10 ? o.fr.toFixed(1) : Math.round(o.fr);
+    $('h2h').innerHTML = `<b>YOU</b> ${ratio.toFixed(1)}× off · <b>SAMPLE FRIEND</b> ${fx}× off<br>` +
+      (o.who === 'tie' ? 'Dead heat. Nothing drops in the jar.' : o.who === 'you' ? `Friend was closer. <a href="#jar">$0.10 goes on your side of the jar ↓</a>` : `You were closer. <a href="#jar">$0.10 goes on your friend's side ↓</a>`);
     bell(t);
   };
-  $('again').onclick = () => load((qi + 1) % QS.length);
+  $('again').onclick = () => { lastOutcome = null; load((qi + 1) % QS.length); };
   addEventListener('resize', () => { render(); if (locked) place(); });
   load(0); document.fonts && document.fonts.ready.then(render);
 </script>
