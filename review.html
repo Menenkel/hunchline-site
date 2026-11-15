@@ -63,6 +63,11 @@
   .group-head .count.full { color: var(--accent); }
   .empty, .error { color: var(--muted); font-size: 14px; text-align: center; padding: 40px 12px; }
   .error { color: var(--bad); }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; }
+  .tabs button { border: none; min-height: 40px; padding: 8px; border-radius: 10px; color: var(--muted); }
+  .tabs button[aria-selected="true"] { background: var(--fg); color: #000; }
+  .card.hidden-q { opacity: .55; border-style: dashed; }
+  .actions.two { grid-template-columns: 1fr; }
   [hidden] { display: none !important; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
@@ -76,7 +81,12 @@
     </div>
     <p class="summary" id="summary"></p>
   </header>
-  <p class="summary">Most shareable first (🔥 = share appeal). Edit to reword a question before approving. Approve plays it today if its category is free, otherwise it goes to the archive. Archive keeps it for Plus without playing it today. Undecided questions are deleted after 7 days.</p>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" id="tab-today" aria-selected="true">Today</button>
+    <button type="button" role="tab" id="tab-archive" aria-selected="false">Archive</button>
+  </div>
+  <p class="summary" id="archive-intro" hidden>Every question in the Plus archive, by category. Edit wording until a question has been played. Remove deletes a question nobody has played yet; one people have played is hidden from the archive instead, so their answers stay.</p>
+  <p class="summary" id="today-intro">Most shareable first (🔥 = share appeal). Edit to reword a question before approving. Approve plays it today if its category is free, otherwise it goes to the archive. Archive keeps it for Plus without playing it today. Undecided questions are deleted after 7 days.</p>
   <div id="list" aria-live="polite"></div>
   <p class="empty" id="loading">Loading…</p>
   <p class="error" id="error" hidden></p>
@@ -95,6 +105,7 @@
   };
 
   const $ = (id) => document.getElementById(id);
+  let view = params.get("view") === "archive" ? "archive" : "today";
   let candidates = [];
   let archiveCounts = {};
   const ARCHIVE_TARGET = 3;
@@ -121,6 +132,7 @@
   }
 
   function updateSummary() {
+    if (view === "archive") return;
     const open = candidates.filter((c) => c.state === "pending").length;
     $("summary").textContent = candidates.length
       ? (open ? `${open} of ${candidates.length} to decide` : `All ${candidates.length} decided`)
@@ -226,7 +238,7 @@
       const res = await fetch(API, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ...auth, id: c.id, ...payload }),
+        body: JSON.stringify({ ...auth, ...(view === "archive" ? { view } : {}), id: c.id, ...payload }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -256,6 +268,160 @@
       updateSummary();
     }
   }
+
+  // ---- Archive view ----------------------------------------------------
+
+  const ARCHIVE_STATE = {
+    archived: "In the archive · not played yet",
+    played: "In the archive",
+    hidden: "Hidden from the archive",
+    rejected: "✗ Deleted",
+  };
+
+  function renderArchive(c) {
+    const card = el("article", { class: "card", id: "q-" + c.id });
+    const meta = el("div", { class: "meta" });
+    const played = c.active_date
+      ? "Played " + new Date(c.active_date + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+      : "Not played yet";
+    meta.append(el("p", { class: "label" }, `${played} · ${c.played_count} answer${c.played_count === 1 ? "" : "s"}`));
+    const wow = Math.min(5, Math.max(1, Math.round(Number(c.wow_score) || 0)));
+    if (c.wow_score) meta.append(el("span", { class: "wow", title: "Share appeal" }, "🔥".repeat(wow) + ` ${wow}/5`));
+    card.append(meta);
+    const qText = el("p", { class: "q" }, c.question);
+    card.append(qText);
+    if (c.source_issue) card.append(el("p", { class: "warn" }, "⚠️ " + c.source_issue));
+    const answer = el("p", { class: "row" }, "Answer: ");
+    answer.append(el("strong", {}, `${Number(c.answer).toLocaleString("en-US")} ${c.unit}`));
+    card.append(answer);
+    const factText = el("p", { class: "row" }, c.fun_fact ? "Fun fact: " + c.fun_fact : "");
+    factText.hidden = !c.fun_fact;
+    card.append(factText);
+    const source = el("p", { class: "row" }, (c.source_name || "Source") + " · ");
+    if (/^https?:\/\//.test(c.source_url || "")) {
+      source.append(el("a", { href: c.source_url, target: "_blank", rel: "noopener noreferrer" }, "Read the article ↗"));
+    }
+    card.append(source);
+
+    const editBtn = el("button", { type: "button", class: "link edit-toggle" }, "✎ Edit wording");
+    const editor = el("div", { class: "editor" });
+    editor.hidden = true;
+    const qInput = el("textarea", { id: "eq-" + c.id, rows: "3" });
+    const fInput = el("textarea", { id: "ef-" + c.id, rows: "2" });
+    const editActions = el("div", { class: "editor-actions" });
+    const saveBtn = el("button", { type: "button", class: "approve" }, "Save wording");
+    const cancelBtn = el("button", { type: "button" }, "Cancel");
+    editActions.append(saveBtn, cancelBtn);
+    editor.append(el("label", { for: "eq-" + c.id }, "Question"), qInput, el("label", { for: "ef-" + c.id }, "Fun fact"), fInput, editActions);
+    editBtn.addEventListener("click", () => {
+      qInput.value = c.question;
+      fInput.value = c.fun_fact || "";
+      editor.hidden = false;
+      editBtn.hidden = true;
+      qInput.focus();
+    });
+    cancelBtn.addEventListener("click", () => { editor.hidden = true; editBtn.hidden = false; });
+    saveBtn.addEventListener("click", async () => {
+      const result = await send(c, card, { action: "edit", question: qInput.value, fun_fact: fInput.value });
+      if (result) {
+        c.question = result.question;
+        if (result.fun_fact !== undefined) c.fun_fact = result.fun_fact;
+        qText.textContent = c.question;
+        factText.textContent = c.fun_fact ? "Fun fact: " + c.fun_fact : "";
+        factText.hidden = !c.fun_fact;
+        editor.hidden = true;
+        paintArchive(c, card, "✓ Wording saved");
+      }
+    });
+
+    const status = el("p", { class: "status", role: "status" });
+    const actions = el("div", { class: "actions two" });
+    const remove = el("button", { type: "button", class: "remove" }, "Remove from archive");
+    const restore = el("button", { type: "button", class: "restore" }, "Put back in archive");
+    for (const [b, action] of [[remove, "remove"], [restore, "restore"]]) {
+      b.addEventListener("click", async () => {
+        if (action === "remove" && !confirm(c.played_count
+          ? "Hide this question from the archive? Players keep their answers."
+          : "Nobody has played this one. Delete it?")) return;
+        const body = await send(c, card, { action });
+        if (body) {
+          const before = c.state;
+          c.state = body.state || c.state;
+          const counted = (s) => s === "archived" || s === "played";
+          if (counted(before) !== counted(c.state)) {
+            archiveCounts[c.category] = (archiveCounts[c.category] || 0) + (counted(c.state) ? 1 : -1);
+            updateGroupCount(c.category);
+          }
+          paintArchive(c, card, "✓ " + body.message.replace(/\.$/, ""));
+        }
+      });
+    }
+    actions.append(remove, restore);
+    card.append(editBtn, editor, status, actions);
+    paintArchive(c, card);
+    return card;
+  }
+
+  function paintArchive(c, card, message, ok = true) {
+    card.classList.toggle("hidden-q", c.state === "hidden");
+    card.classList.toggle("done", c.state === "rejected");
+    const status = card.querySelector(".status");
+    status.className = "status " + (ok ? "ok" : "bad");
+    status.textContent = message || ARCHIVE_STATE[c.state] || "";
+    card.querySelector(".actions").hidden = c.state === "rejected";
+    card.querySelector(".remove").hidden = c.state === "hidden";
+    card.querySelector(".restore").hidden = c.state !== "hidden";
+    card.querySelector(".edit-toggle").hidden = c.state === "rejected" || Boolean(c.active_date);
+  }
+
+  async function loadArchive() {
+    $("title").textContent = "Archive";
+    const res = await fetch(API + "?" + new URLSearchParams({ ...auth, view: "archive" }));
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) return showError(body.error || `Couldn't load the archive (${res.status}).`);
+    const questions = body.questions || [];
+    candidates = questions;
+    archiveCounts = {};
+    for (const q of questions) if (q.state !== "hidden") archiveCounts[q.category] = (archiveCounts[q.category] || 0) + 1;
+    $("loading").hidden = true;
+    const visible = questions.filter((q) => q.state !== "hidden").length;
+    const flagged = questions.filter((q) => q.source_issue && q.state !== "hidden").length;
+    $("summary").textContent = `${visible} in the archive` + (flagged ? ` · ${flagged} with a source problem` : "");
+    const groups = new Map();
+    for (const q of questions) {
+      if (!groups.has(q.category)) groups.set(q.category, []);
+      groups.get(q.category).push(q);
+    }
+    const ordered = [...groups.keys()].sort((a, b) => (archiveCounts[a] || 0) - (archiveCounts[b] || 0) || a.localeCompare(b));
+    if (!ordered.length) $("list").append(el("p", { class: "empty" }, "The archive is empty."));
+    for (const category of ordered) {
+      const head = el("div", { class: "group-head" });
+      head.append(el("h2", {}, category));
+      head.append(el("span", { class: "count", "data-count-for": category }));
+      $("list").append(head);
+      updateGroupCount(category);
+      for (const q of groups.get(category)) $("list").append(renderArchive(q));
+    }
+  }
+
+  function showView(next) {
+    view = next;
+    $("tab-today").setAttribute("aria-selected", String(view === "today"));
+    $("tab-archive").setAttribute("aria-selected", String(view === "archive"));
+    $("today-intro").hidden = view !== "today";
+    $("archive-intro").hidden = view !== "archive";
+    $("list").replaceChildren();
+    $("summary").textContent = "";
+    $("error").hidden = true;
+    $("loading").hidden = false;
+    const url = new URL(location.href);
+    if (view === "archive") url.searchParams.set("view", "archive"); else url.searchParams.delete("view");
+    history.replaceState(null, "", url);
+    if (!auth.day || !auth.exp || !auth.sig) return showError("Open this page from the button in the daily curator email.");
+    (view === "archive" ? loadArchive() : load()).catch(() => showError("Couldn't reach Hunchline. Check your connection and reload."));
+  }
+  $("tab-today").addEventListener("click", () => showView("today"));
+  $("tab-archive").addEventListener("click", () => showView("archive"));
 
   async function load() {
     if (!auth.day || !auth.exp || !auth.sig) {
@@ -295,7 +461,7 @@
     }
   }
 
-  load();
+  showView(view);
 </script>
 </body>
 </html>
