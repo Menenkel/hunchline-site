@@ -160,7 +160,7 @@
         <div class="kicker"><i></i>404</div>
         <h1>Nothing <em>here</em></h1>
       </div>
-      <p class="lede">This page doesn't exist. If a friend sent you a link, check it was copied in full, or ask them for their 6-letter code.</p>
+      <p class="lede">This page doesn't exist. If a friend sent you a link, check it was copied in full, or ask them for their 8-character code.</p>
       <a class="btn ghost" href="/">Go to hunchline.online</a>
     </div>
   </section>
@@ -178,8 +178,8 @@
   const SUPABASE_URL = "https://qoecsasamqwbhfnbsddp.supabase.co";
   const SUPABASE_KEY = "sb_publishable_KbFxZg7vEU9EudZtFG9GcQ_bppnGeFO";
 
-  const match = location.pathname.match(/^\/invite\/([A-Za-z0-9]{6})\/?$/)
-    || location.search.match(/[?&]c(?:ode)?=([A-Za-z0-9]{6})\b/);
+  const match = location.pathname.match(/^\/invite\/([A-Za-z0-9]{8})\/?$/)
+    || location.search.match(/[?&]c(?:ode)?=([A-Za-z0-9]{8})\b/);
   const code = match && match[1].toUpperCase();
 
   if (!code) {
