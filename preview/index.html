@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hunchline — guess the news</title>
+<meta name="description" content="Guess one number from today's news, see how sharp your hunch was, and settle the score with a friend in person.">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#000; --fg:#fff; --fg2:#e6e6e6; --muted:#7a7a7a; --line:#2a2a2a; --line2:#3a3a3a; --accent:#f2c31b; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--fg); }
+  body {
+    font: 500 16px/1.45 "Outfit", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+  }
+  /* yellow wash that follows the knob */
+  body::before {
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background: radial-gradient(600px 400px at var(--kx, 70%) 38%, rgba(242,195,27,.14), transparent 70%);
+  }
+  .wrap { position:relative; z-index:1; max-width:1040px; margin:0 auto; min-height:calc(100svh - 40px); display:flex; flex-direction:column; }
+
+  header { display:flex; align-items:center; justify-content:space-between; padding:6px 0 0; }
+  .mark { font-weight:900; font-size:26px; letter-spacing:-.04em; position:relative; padding-top:9px; text-decoration:none; color:var(--fg); }
+  .mark::before { content:""; position:absolute; left:0; right:0; top:0; height:3px; border-radius:3px; background:var(--fg); }
+  .mark::after { content:""; position:absolute; top:-4px; left:64%; width:11px; height:11px; border-radius:50%; background:var(--accent); }
+  .pill { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; padding:7px 12px; border:1.5px solid var(--line2); border-radius:999px; color:var(--muted); }
+
+  main { flex:1; display:flex; flex-direction:column; justify-content:center; gap:34px; padding:34px 0 26px; }
+  .kicker { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); display:flex; gap:10px; align-items:center; }
+  .kicker i { width:28px; height:1.5px; background:var(--accent); }
+  h1 { margin:10px 0 0; font-weight:900; font-size:clamp(44px, 9.2vw, 112px); line-height:.92; letter-spacing:-.045em; text-wrap:balance; }
+  h1 em { font-style:normal; color:var(--accent); }
+
+  /* ---- the demo ---- */
+  .demo { border:1.5px solid var(--line); border-radius:16px; padding:22px 22px 20px; background:rgba(255,255,255,.015); }
+  .q { font-weight:700; font-size:clamp(19px,2.6vw,25px); letter-spacing:-.02em; line-height:1.2; display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
+  .tog { display:flex; border:1.5px solid var(--line2); border-radius:999px; padding:2px; flex:none; }
+  .tog.off { visibility:hidden; }
+  .tog button { font:inherit; font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); background:transparent; border:0; padding:5px 10px; border-radius:999px; cursor:pointer; }
+  .tog button[aria-pressed="true"] { background:var(--fg); color:#000; }
+  .cap { font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+  .val .conv { font-size:.3em; color:var(--muted); font-weight:700; }
+  .val { font-weight:800; font-size:clamp(48px,8vw,84px); letter-spacing:-.04em; font-variant-numeric:tabular-nums; line-height:1; margin:14px 0 6px; display:flex; align-items:baseline; gap:10px; }
+  .val > span { font-size:.3em; letter-spacing:.02em; color:var(--muted); font-weight:700; }
+
+  .slider { position:relative; height:46px; touch-action:none; cursor:grab; user-select:none; -webkit-user-select:none; margin:0 11px; }
+  .slider:active { cursor:grabbing; }
+  .track { position:absolute; left:-11px; right:-11px; top:21px; height:5px; border-radius:5px; background:var(--fg); }
+  .knob { position:absolute; top:23.5px; width:34px; height:34px; border-radius:50%; background:var(--accent); transform:translate(-50%,-50%); box-shadow:0 0 0 0 rgba(242,195,27,.5), 0 0 28px rgba(242,195,27,.55); transition:transform .15s; }
+  .slider:active .knob { transform:translate(-50%,-50%) scale(1.15); }
+  .slider:focus-visible { outline:2px solid var(--accent); outline-offset:6px; border-radius:8px; }
+  .pulse .knob { animation:pulse 1.8s ease-out infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(242,195,27,.55),0 0 28px rgba(242,195,27,.55)} 70%,100%{box-shadow:0 0 0 20px rgba(242,195,27,0),0 0 28px rgba(242,195,27,.55)} }
+  .ans { position:absolute; top:23.5px; width:0; height:0; opacity:0; transition:opacity .4s .25s; }
+  .ans::before { content:""; position:absolute; left:-2px; top:-22px; width:4px; height:44px; background:var(--fg); border-radius:2px; }
+  .ans b { position:absolute; top:-46px; left:0; transform:translateX(-50%); font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; background:var(--fg); color:#000; padding:3px 8px; border-radius:999px; }
+  .ticks { position:relative; height:14px; margin:0 11px; font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--muted); font-variant-numeric:tabular-nums; }
+
+  .ticks span { position:absolute; transform:translateX(-50%); } .ticks span:first-child { transform:none; } .ticks span:last-child { transform:translateX(-100%); }
+  .reveal { display:grid; grid-template-rows:0fr; transition:grid-template-rows .5s cubic-bezier(.2,.8,.2,1); }
+  .reveal > div { overflow:hidden; }
+  .done .reveal { grid-template-rows:1fr; }
+  .verdict { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; padding-top:20px; flex-wrap:wrap; }
+  .verdict .big { font-weight:900; font-size:clamp(34px,5vw,54px); letter-spacing:-.04em; line-height:1; }
+  .verdict .big em { font-style:normal; color:var(--accent); }
+  .verdict p { margin:6px 0 0; color:var(--fg2); font-size:14px; } .verdict p a { color:var(--muted); text-decoration:underline; text-underline-offset:3px; white-space:nowrap; } .verdict p a:hover { color:var(--accent); }
+  svg.bell { width:min(340px,100%); height:auto; display:block; }
+
+  .row { display:flex; align-items:center; gap:14px; margin-top:18px; flex-wrap:wrap; }
+  .btn { font:inherit; font-weight:800; font-size:14px; letter-spacing:.1em; text-transform:uppercase; border:0; cursor:pointer; background:var(--fg); color:#000; height:54px; padding:0 26px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; gap:10px; text-decoration:none; transition:transform .15s, opacity .15s; }
+  .btn:hover { transform:translateY(-2px); } .btn:active { opacity:.7; transform:none; }
+  .btn.ghost { background:transparent; color:var(--fg); border:1.5px solid var(--line2); }
+  .hint { font-size:12px; color:var(--muted); font-weight:600; }
+  .demo:not(.done) .again, .done .lock { display:none; }
+
+  /* ---- steps + download ---- */
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .step { border-top:1.5px solid var(--line); padding-top:12px; }
+  .step b { display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:800; color:var(--accent); margin-bottom:4px; }
+  .step span { font-size:14px; color:var(--fg2); font-weight:500; line-height:1.35; display:block; }
+
+  .dl { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; border-top:1.5px solid var(--line); padding-top:22px; }
+  .dl .app { display:flex; align-items:center; gap:14px; }
+  .dl img { width:56px; height:56px; border-radius:13px; border:1.5px solid var(--line2); }
+  .dl strong { display:block; font-weight:800; font-size:18px; letter-spacing:-.02em; }
+  .dl small { color:var(--muted); font-size:12px; font-weight:600; }
+  .btn.big { height:62px; padding:0 34px; font-size:15px; box-shadow:0 0 0 0 rgba(242,195,27,0); }
+  .btn.big:hover { box-shadow:0 8px 40px rgba(242,195,27,.35); }
+  .btn svg { width:20px; height:20px; fill:currentColor; margin-top:-2px; }
+
+  footer { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); padding-top:18px; font-weight:600; }
+  footer a { color:inherit; }
+
+  @media (max-width:640px) {
+    .steps { grid-template-columns:1fr; gap:10px; } .step { display:flex; gap:12px; align-items:baseline; } .step b { min-width:78px; margin:0; white-space:nowrap; }
+    .demo { padding:18px 16px; } .dl .btn { width:100%; padding:0 16px; letter-spacing:.06em; }
+  }
+  @media (prefers-reduced-motion:reduce) { *{animation:none!important; transition:none!important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="mark" href="/">hunchline</a>
+    <span class="pill">Free · iPhone</span>
+  </header>
+
+  <main>
+    <div>
+      <div class="kicker"><i></i>One number from today's news</div>
+      <h1>Guess the news.<br><em>Settle it in person.</em></h1>
+    </div>
+
+    <section class="demo pulse" id="demo" aria-label="Try it">
+      <div class="q"><span id="qtext"></span><div class="tog off" id="tog" role="group" aria-label="Units"><button data-s="imp" aria-pressed="false">US</button><button data-s="met" aria-pressed="true">Metric</button></div></div>
+      <div class="val"><output id="out"></output><span id="unit"></span><span class="conv" id="conv"></span></div>
+      <div class="slider" id="sl" role="slider" tabindex="0" aria-label="Your guess" aria-valuemin="1" aria-valuenow="1">
+        <div class="track"></div>
+        <div class="ans" id="ans"><b id="ansl"></b></div>
+        <div class="knob" id="kn"></div>
+      </div>
+      <div class="ticks" id="ticks"></div>
+
+      <div class="reveal"><div>
+        <div class="verdict">
+          <div><div class="big" id="verdict">—</div><p id="sub"></p></div>
+          <div><svg class="bell" viewBox="0 0 340 90" aria-hidden="true">
+            <path id="curve" d="" fill="rgba(255,255,255,.08)" stroke="#fff" stroke-width="2"/>
+            <line id="alin" y1="16" y2="78" stroke="#fff" stroke-width="2" stroke-dasharray="3 3"/>
+            <text id="alab" y="10" fill="#fff" font-size="8.5" font-weight="800" letter-spacing="1.2" text-anchor="middle">ANSWER</text>
+            <line id="you" y1="6" y2="78" stroke="#f2c31b" stroke-width="3" stroke-linecap="round"/>
+            <circle id="youd" r="6" fill="#f2c31b"/>
+            <line x1="0" x2="340" y1="78" y2="78" stroke="#fff" stroke-width="2"/>
+          </svg><div class="cap" id="cap"></div></div>
+        </div>
+      </div></div>
+
+      <div class="row">
+        <button class="btn lock" id="lock">Lock in</button>
+        <button class="btn ghost again" id="again">Next question</button>
+        <span class="hint lock">Drag the dot. Same slider as the app. New questions every day.</span>
+      </div>
+    </section>
+
+    <div class="steps">
+      <div class="step"><b>1 · Guess</b><span>A real number from today's headlines. Make your best call on a slider.</span></div>
+      <div class="step"><b>2 · Reveal</b><span>See the answer and how sharp your hunch was against everyone.</span></div>
+      <div class="step"><b>3 · Jar</b><span>Whoever's further off all month buys the next round. In real life.</span></div>
+    </div>
+
+    <div class="dl">
+      <div class="app"><img src="icon.png" alt="Hunchline app icon"><div><strong>Hunchline</strong><small>Two minutes a day. Then put the phone down.</small></div></div>
+      <a class="btn big" id="store" href="#"><svg viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg><span id="storeTxt">Download</span></a>
+    </div>
+  </main>
+
+  <footer><span>© Hunchline</span><span>hunchline.online</span></footer>
+</div>
+
+<script>
+  // Set to the App Store link once the app is live.
+  const APP_STORE_URL = null;
+  const store = document.getElementById('store');
+  if (APP_STORE_URL) store.href = APP_STORE_URL;
+  else { document.getElementById('storeTxt').textContent = 'Coming soon · App Store'; store.style.pointerEvents = 'none'; }
+
+  // Real questions from the Hunchline question bank. `a` is in the source's own unit (base).
+  // imp/met = how the slider reads in each system: unit, factor from base, lo/hi = slider range as powers of ten.
+  // med/sd = MODELLED typical guess (median, spread in log10 units). An estimate, not measured crowd data.
+  const same = (unit, lo, hi) => ({ unit, f: 1, lo, hi });
+  const QS = [
+    { q: "How long was SpaceX's Starship when the launch tower's arms caught it?", a: 170, med: 250, sd: .30, src: 'NYT', url: 'https://www.nytimes.com/2026/11/14/science/spacex-starship-first-catch.html',
+      imp: { unit: 'ft', f: 1, lo: 1, hi: 4 }, met: { unit: 'm', f: .3048, lo: 0, hi: 3 } },
+    { q: 'How many milliseconds does a crow take to peck its answer?', a: 235, med: 600, sd: .40, src: 'NYT', url: 'https://www.nytimes.com/2026/11/15/science/birdbrain-is-a-misnomer-crows-make-decisions-faster-than-we-can.html',
+      imp: same('ms', 1, 4), met: same('ms', 1, 4) },
+    { q: 'How many miles did Karl Bushby walk on his 28-year trek home to Hull?', a: 31000, med: 20000, sd: .30, src: 'BBC', url: 'https://www.bbc.co.uk/news/articles/c9146yve236lo',
+      imp: { unit: 'mi', f: 1, lo: 2, hi: 5 }, met: { unit: 'km', f: 1.609344, lo: 2, hi: 5 } },
+    { q: 'How many crushed oyster shells coat the walls of Powerhouse Parramatta?', a: 600000, med: 60000, sd: .60, src: 'The Guardian', url: 'https://www.theguardian.com/culture/ng-interactive/2026/nov/06/powerhouse-parramatta-opening-festival',
+      imp: same('shells', 3, 7), met: same('shells', 3, 7) },
+    { q: "How many people applied for NASA's astronaut class of just 10?", a: 8000, med: 2000, sd: .50, src: 'The Guardian', url: 'https://www.theguardian.com/science/2026/nov/08/nasa-astronauts-moon-applications-open',
+      imp: same('applicants', 1, 5), met: same('applicants', 1, 5) }
+  ];
+
+  const $ = id => document.getElementById(id);
+  const demo = $('demo'), sl = $('sl'), kn = $('kn'), out = $('out'), ans = $('ans');
+  let qi = 0, lo = 1, hi = 4, f = 1, U = {}, t = .5, locked = false;
+
+  // default unit system by locale; remembered for the visit
+  let sys = /^(en-US|en-LR|my)/i.test(navigator.language || '') ? 'imp' : 'met';
+  try { sys = sessionStorage.getItem('hl-sys') || sys; } catch (e) {}
+
+  const sig3 = v => { const m = Math.pow(10, Math.floor(Math.log10(v)) - 2); return Math.round(v / m) * m; };
+  const fmt = v => v < 10 ? v.toFixed(1).replace('.0', '') : Math.round(v).toLocaleString('en-US');
+  const fmtC = v => v < 10 ? v.toFixed(1).replace('.0', '') : v < 100 ? Math.round(v).toLocaleString('en-US') : sig3(v).toLocaleString('en-US');
+  const both = (base, withApprox) => {            // "170 ft (52 m)"  /  "31,000 mi (49,900 km)"
+    const Q = QS[qi], i = Q.imp, m = Q.met;
+    if (i.unit === m.unit) return `${fmt(base)} ${i.unit}`;
+    const [x, y] = sys === 'imp' ? [i, m] : [m, i];
+    return `${fmtC(base * x.f)} ${x.unit} (${fmtC(base * y.f)} ${y.unit})`;
+  };
+  const valOf = t => Math.pow(10, lo + t * (hi - lo));            // slider value in the active unit
+  const tOf = v => (Math.log10(v) - lo) / (hi - lo);
+  const place = () => { ans.style.left = (tOf(QS[qi].a * f) * sl.clientWidth) + 'px'; };
+
+  function load(i) {
+    const Q = QS[i]; qi = i; U = Q[sys]; f = U.f; lo = U.lo; hi = U.hi; locked = false; t = .5;
+    demo.classList.remove('done'); ans.style.opacity = 0;
+    $('qtext').textContent = Q.q; $('unit').textContent = U.unit;
+    $('ansl').textContent = both(Q.a);
+    $('tog').classList.toggle('off', Q.imp.unit === Q.met.unit);
+    document.querySelectorAll('#tog button').forEach(b => b.setAttribute('aria-pressed', b.dataset.s === sys));
+    const n = hi - lo; let h = '';
+    for (let k = 0; k <= n; k++) h += `<span style="left:${(k / n * 100)}%">${Math.pow(10, lo + k).toLocaleString('en-US')}</span>`;
+    $('ticks').innerHTML = h;
+    sl.setAttribute('aria-valuemin', Math.pow(10, lo)); sl.setAttribute('aria-valuemax', Math.pow(10, hi));
+    render();
+  }
+  function render() {
+    const w = sl.clientWidth, v = valOf(t), Q = QS[qi];
+    kn.style.left = (t * w) + 'px';
+    out.textContent = fmt(v);
+    $('conv').textContent = Q.imp.unit === Q.met.unit ? '' : ' ≈ ' + fmtC(v / f * (sys === 'imp' ? Q.met.f : Q.imp.f)) + ' ' + (sys === 'imp' ? Q.met.unit : Q.imp.unit);
+    sl.setAttribute('aria-valuenow', Math.round(v));
+    document.body.style.setProperty('--kx', (sl.getBoundingClientRect().left + 11 + t * w) + 'px');
+  }
+  function setFromX(x) { const r = sl.getBoundingClientRect(); t = Math.min(1, Math.max(0, (x - r.left) / r.width)); render(); }
+  sl.addEventListener('pointerdown', e => { if (locked) return; demo.classList.remove('pulse'); sl.setPointerCapture(e.pointerId); setFromX(e.clientX); sl.onpointermove = ev => setFromX(ev.clientX); });
+  sl.addEventListener('pointerup', () => { sl.onpointermove = null; });
+  sl.addEventListener('keydown', e => { if (locked) return; const st = e.shiftKey ? .05 : .01; if (e.key === 'ArrowRight' || e.key === 'ArrowUp') t = Math.min(1, t + st); else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') t = Math.max(0, t - st); else return; e.preventDefault(); demo.classList.remove('pulse'); render(); });
+  document.querySelectorAll('#tog button').forEach(b => b.onclick = () => {
+    if (b.dataset.s === sys) return;
+    const keep = valOf(t) / f;                           // keep the guess, re-express it on the new scale
+    sys = b.dataset.s; try { sessionStorage.setItem('hl-sys', sys); } catch (e) {}
+    const was = locked; load(qi);
+    { t = Math.min(1, Math.max(0, tOf(keep * f))); render(); }
+    if (was) $('lock').onclick();
+  });
+
+  // normal CDF (Abramowitz-Stegun) for the percentile estimate
+  const erf = x => { const s = Math.sign(x); x = Math.abs(x); const k = 1 / (1 + .3275911 * x); return s * (1 - (((((1.061405429 * k - 1.453152027) * k) + 1.421413741) * k - .284496736) * k + .254829592) * k * Math.exp(-x * x)); };
+  const Phi = z => .5 * (1 + erf(z / Math.SQRT2));
+
+  // modelled crowd: log-normal around Q.med
+  function bell(tYou) {
+    const Q = QS[qi], W = 340, H = 78, mu = tOf(Q.med * f), sg = Q.sd / (hi - lo); let d = '';
+    for (let i = 0; i <= 120; i++) { const x = i / 120, y = Math.exp(-((x - mu) ** 2) / (2 * sg * sg)); d += (i ? 'L' : 'M') + (x * W).toFixed(1) + ' ' + (H - y * 58).toFixed(1); }
+    $('curve').setAttribute('d', d + `L${W} ${H}L0 ${H}Z`);
+    const yy = H - Math.exp(-((tYou - mu) ** 2) / (2 * sg * sg)) * 58, xx = tYou * W, ax = tOf(Q.a * f) * W;
+    $('you').setAttribute('x1', xx); $('you').setAttribute('x2', xx); $('you').setAttribute('y1', yy); $('you').setAttribute('y2', H);
+    $('youd').setAttribute('cx', xx); $('youd').setAttribute('cy', yy);
+    $('alin').setAttribute('x1', ax); $('alin').setAttribute('x2', ax);
+    $('alab').setAttribute('x', Math.min(W - 24, Math.max(24, ax)));
+    $('cap').textContent = 'Typical guesses (est.) ≈ ' + both(Q.med);
+  }
+  // share of the modelled crowd you beat on closeness
+  function beats(guessBase) {
+    const Q = QS[qi], la = Math.log10(Q.a), m = Math.log10(Q.med), d = Math.abs(Math.log10(guessBase) - la);
+    const within = Phi((la + d - m) / Q.sd) - Phi((la - d - m) / Q.sd);
+    return Math.min(99, Math.max(1, Math.round((1 - within) * 100)));
+  }
+
+  $('lock').onclick = () => {
+    locked = true; demo.classList.add('done');
+    const Q = QS[qi], v = valOf(t), vb = v / f, ratio = Math.max(vb, Q.a) / Math.min(vb, Q.a);
+    place(); ans.style.opacity = 1;
+    $('verdict').innerHTML = ratio < 1.1 ? 'Dead on. <em>Wow.</em>' : ratio < 2 ? `<em>${ratio.toFixed(1)}×</em> off. Close.` : `<em>${ratio < 10 ? ratio.toFixed(1) : Math.round(ratio)}×</em> off.`;
+    $('sub').innerHTML = `You said ${both(vb)}. It's ${both(Q.a)}. <a href="${Q.url}" target="_blank" rel="noopener">${Q.src} ↗</a><br>Closer than ~${beats(vb)}% of typical guesses (est.)`;
+    bell(t);
+  };
+  $('again').onclick = () => load((qi + 1) % QS.length);
+  addEventListener('resize', () => { render(); if (locked) place(); });
+  load(0); document.fonts && document.fonts.ready.then(render);
+</script>
+</body>
+</html>
