@@ -111,7 +111,7 @@
   .cap { font:500 10px var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:6px; }
 
   /* ---------- the jar ---------- */
-  .jar { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,520px); gap:40px 64px; align-items:center; margin-top:84px; padding-top:44px; border-top:1.5px solid var(--line); }
+  .jar { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,520px); gap:40px 64px; align-items:center; margin-top:max(120px, 18vh); margin-top:calc(max(120px, 18vh) + (100lvh - 100svh)); padding-top:44px; border-top:1.5px solid var(--line); }
   h2 { margin:14px 0 0; font-weight:800; font-size:clamp(40px,6vw,78px); line-height:.94; letter-spacing:-.012em; font-variation-settings:"wdth" 84, "opsz" 96; text-wrap:balance; }
   h2 em { font-style:normal; color:var(--accent); }
   .jar p.lead { margin:20px 0 0; max-width:44ch; color:var(--fg2); font-size:17px; line-height:1.45; }
@@ -149,7 +149,7 @@
   @media (max-width:900px) {
     :root { --inset:30px; }
     .result { grid-template-columns:1fr; }
-    .jar { display:flex; flex-direction:column; align-items:stretch; margin-top:56px; padding-top:34px; }
+    .jar { display:flex; flex-direction:column; align-items:stretch; margin-top:max(96px, 14vh); margin-top:calc(max(96px, 14vh) + (100lvh - 100svh)); padding-top:34px; }
     .result > div:last-child { max-width:380px; }
     .jar-copy { display:contents; }
     .jar-copy .kicker { order:1; } .jar-copy h2 { order:2; }
