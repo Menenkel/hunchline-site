@@ -86,7 +86,11 @@
     <button type="button" role="tab" id="tab-archive" aria-selected="false">Archive</button>
   </div>
   <p class="summary" id="archive-intro" hidden>Every question in the Plus archive, by category. Edit wording until a question has been played. Remove deletes a question nobody has played yet; one people have played is hidden from the archive instead, so their answers stay.</p>
-  <p class="summary" id="today-intro">Most shareable first (🔥 = share appeal). Edit to reword a question before approving. Approve plays it today if its category is free, otherwise it goes to the archive. Archive keeps it for Plus without playing it today. Undecided questions are deleted after 7 days.</p>
+  <p class="summary" id="today-intro">Most shareable first (🔥 = share appeal). Edit to reword a question before approving. Approve queues it as a daily question: one plays each day, in the order you approve them. Archive keeps it for Plus. Days with nothing queued get the best archive question automatically. Undecided questions are deleted after 7 days.</p>
+  <section id="queue" hidden>
+    <div class="group-head"><h2>Coming up</h2><span class="count" id="queue-count"></span></div>
+    <div id="queue-list"></div>
+  </section>
   <div id="list" aria-live="polite"></div>
   <p class="empty" id="loading">Loading…</p>
   <p class="error" id="error" hidden></p>
@@ -98,7 +102,8 @@
   const auth = { day: params.get("day"), exp: params.get("exp"), sig: params.get("sig") };
 
   const STATE_TEXT = {
-    live: "✓ Live today",
+    live: "✓ Today's question",
+    queued: "✓ Queued as a daily question",
     archived: "✓ In the archive",
     played: "✓ Already played",
     rejected: "✗ Rejected",
@@ -220,14 +225,38 @@
     card.classList.toggle("done", c.state !== "pending");
     card.classList.toggle("live", c.state === "live");
     status.className = "status " + (ok ? "ok" : "bad");
-    status.textContent = message || STATE_TEXT[c.state] || "";
-    // A decided question can still be pushed live (archive → approve), but
+    status.textContent = message
+      || (c.state === "queued" && c.plays_on ? `✓ Daily question on ${c.plays_on}` : STATE_TEXT[c.state] || "");
+    // A decided question can still be queued (archive → approve), but
     // nothing else changes once it's live, played or rejected.
     const final = ["live", "played", "rejected"].includes(c.state);
     actions.hidden = final;
     // Wording can change until a question has been played (or rejected).
     card.querySelector(".edit-toggle").hidden = ["played", "rejected"].includes(c.state);
     actions.querySelector(".save").hidden = c.state === "archived";
+    actions.querySelector(".approve").hidden = c.state === "queued";
+  }
+
+  /** The upcoming daily questions, with the day each one plays. */
+  function renderQueue(queue) {
+    $("queue").hidden = view !== "today";
+    $("queue-count").textContent = queue.length
+      ? `${queue.length} day${queue.length === 1 ? "" : "s"} covered`
+      : "Empty: the best archive question plays";
+    const list = $("queue-list");
+    list.replaceChildren();
+    for (const q of queue) {
+      const row = el("p", { class: "row" });
+      row.append(el("strong", {}, q.label + " · "), document.createTextNode(`${q.category}: ${q.question}`));
+      list.append(row);
+    }
+  }
+
+  async function refreshQueue() {
+    try {
+      const res = await fetch(API + "?" + new URLSearchParams(auth));
+      if (res.ok) renderQueue((await res.json()).queue || []);
+    } catch {}
   }
 
   /** Calls the API for one card. Returns the response body on success, null on failure. */
@@ -266,6 +295,7 @@
       c.state = body.state || c.state;
       paint(c, card, "✓ " + body.message.replace(/\.$/, ""));
       updateSummary();
+      refreshQueue();
     }
   }
 
@@ -275,6 +305,7 @@
     "Money & Scale", "Sports Records", "Pop Culture", "Human Engineering", "Physics & Energy"];
 
   const ARCHIVE_STATE = {
+    queued: "Queued as a daily question",
     archived: "In the archive · not played yet",
     played: "In the archive",
     hidden: "Hidden from the archive",
@@ -414,6 +445,7 @@
     $("tab-archive").setAttribute("aria-selected", String(view === "archive"));
     $("today-intro").hidden = view !== "today";
     $("archive-intro").hidden = view !== "archive";
+    $("queue").hidden = true;
     $("list").replaceChildren();
     $("summary").textContent = "";
     $("error").hidden = true;
@@ -440,6 +472,7 @@
       if (!res.ok) return showError(body.error || `Couldn't load the questions (${res.status}).`);
       candidates = body.candidates || [];
       archiveCounts = body.archive_counts || {};
+      renderQueue(body.queue || []);
       $("loading").hidden = true;
       if (!candidates.length) {
         $("list").append(el("p", { class: "empty" }, "No questions left for this day. Rejected ones are gone; older undecided ones are deleted after 7 days."));
